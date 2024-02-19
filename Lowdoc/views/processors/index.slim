@@ -1,0 +1,9 @@
+h2 Processors
+a href="/processors/new" Add Processor
+
+- processors.each do |processor|
+    h3 = processor["name"]
+    form method="get" action="/processors/#{processor["id"]}/edit"
+        input type="submit" value="Edit"/
+    form method="post" action="processors/#{processor["id"]}/delete"
+        input type="submit" value="Delete"/

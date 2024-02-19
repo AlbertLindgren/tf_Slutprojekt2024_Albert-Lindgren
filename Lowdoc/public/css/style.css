@@ -1,4 +1,19 @@
 * {
     font-family: Verdana, Geneva, Tahoma, sans-serif;
-    font-size: 1.4rem;
+}
+
+h2 {
+    font-size: 4rem;
+}
+
+p {
+    font-size: 1.5rem;
+}
+
+ol {
+    font-size: 1.5rem;
+}
+
+a {
+    font-size: 1.5rem;
 }

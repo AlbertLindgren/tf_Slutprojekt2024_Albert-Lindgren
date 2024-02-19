@@ -4,8 +4,9 @@ require 'sqlite3'
 require_relative "model.rb"
 
 # Hashes containing text for procesors and subjects, ids used as keys
-processors_desc = Hash.new
-subjects_desc = Hash.new
+#processors_desc = Hash.new
+#subjects_desc = Hash.new
+# Save paths to text, '/public/text/processors/1.txt'
 
 enable :sessions
 
@@ -14,16 +15,17 @@ get('/') do
 end
 
 #Processors
-get('/processors/index') do
-
+get('/processors') do
+    result = getDBItems('db/lowdoc.db', 'processors')
+    slim(:"processors/index", locals:{processors:result})
 end
 
-get('/processors/show') do
+get('/processors/:id/show') do
 
 end
 
 get('/processors/new') do
-
+    slim(:"processors/new")
 end
 
 get('/processors/:id/edit') do
@@ -35,6 +37,9 @@ post('processors/:id/update') do
 end
 
 post('/processors/create') do
+    name = params[:name]
+    content = params[:content]
+    
 
 end
 
@@ -43,8 +48,9 @@ post('/processors/:id/delete') do
 end
 
 #Subjects
-get('/subjects/index') do
-
+get('/subjects') do
+    result = getDBItems('db/lowdoc.db', 'subjects')
+    slim(:"subjects/index", locals:{subjects:result})
 end
 
 get('/subjects/:id/show') do
@@ -72,26 +78,27 @@ post('/subjects/:id/delete') do
 end
 
 #Searching and links
-get('/browsing/index') do
+get('/browsing') do
+    result = getDBItems('db/lowdoc.db', 'links')
+    slim(:"browsing/index", locals:{links:result})
+end
+
+get('/browsing/new') do
 
 end
 
-get('/links/new') do
+get('/browsing/:id/edit') do
 
 end
 
-get('/links/:id/edit') do
+post('browsing/:id/update') do
 
 end
 
-post('links/:id/update') do
+post('/browsing/create') do
 
 end
 
-post('/links/create') do
-
-end
-
-post('/links/:id/delete') do
+post('/browsing/:id/delete') do
 
 end

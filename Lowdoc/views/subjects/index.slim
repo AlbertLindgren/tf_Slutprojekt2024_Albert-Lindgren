@@ -1,0 +1,9 @@
+h2 Subjects
+a href="/subjects/new" Add Subjects
+
+- subjects.each do |subject|
+    h3 = subject["name"]
+    form method="get" action="/subjects/#{subject["id"]}/edit"
+        input type="submit" value="Edit"/
+    form method="post" action="subjects/#{subject["id"]}/delete"
+        input type="submit" value="Delete"/
