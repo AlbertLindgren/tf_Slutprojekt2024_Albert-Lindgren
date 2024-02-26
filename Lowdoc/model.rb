@@ -35,7 +35,7 @@ def addRecord(source, type, name, content)
 
         if content != nil
             id = db.execute("SELECT id FROM #{type} ORDER BY id DESC LIMIT 1")
-            textfile = File.new("public/text/processors/#{id}.txt", "w+")
+            textfile = File.new("text/processors/#{id}.txt", "w+")
             textfile.syswrite(content)
         end
     when "Subjects"
@@ -43,7 +43,7 @@ def addRecord(source, type, name, content)
 
         if content != nil
             id = db.execute("SELECT id FROM #{type} ORDER BY id DESC LIMIT 1")
-            textfile = File.new("public/text/subjects/#{id}.txt", "w+")
+            textfile = File.new("text/subjects/#{id}.txt", "w+")
             textfile.syswrite(content)
         end
     when "Links"
@@ -77,7 +77,7 @@ def updateRecord(source, type, id, name, content)
         db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
 
         if content != nil
-            textfile = File.new("public/text/processors/[[#{id}]].txt", "w+")
+            textfile = File.new("text/processors/[[#{id}]].txt", "w+")
             textfile.syswrite(content)
         end
     when "Subjects"
