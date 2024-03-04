@@ -33,6 +33,14 @@ end
 get('/processors/:id/edit') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', 'Processors', @id, 'name')
+
+    # Get relational info
+    @relSubjects = getDBItemsWithRelId('db/lowdoc.db', 'Processors', 'subject_id', @id)
+    @relLinks = getDBItemsWithRelId('db/lowdoc.db', 'Processors', 'link_id', @id)
+
+    @subjects = getDBItems('db/lowdoc.db', 'Subjects')
+    @links = getDBItems('db/lowdoc.db', 'Links')
+
     slim(:"processors/edit")
 end
 

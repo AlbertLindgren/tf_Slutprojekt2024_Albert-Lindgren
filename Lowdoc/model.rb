@@ -16,6 +16,64 @@ def getDBItems(source, type)
     return result
 end
 
+def getDBItemsWithRelId(source, type, requestedType, id)
+    if source.class != String
+        raise "Error, wrong datatype"
+    end
+    if type.class != String
+        raise "Error, wrong datatype"
+    end
+    if requestedType.class != String
+        raise "Error, wrong datatype"
+    end
+  #  if id.class != Integer
+   #     raise "Error, wrong datatype"
+   # end
+
+    db = SQLite3::Database.new(source)
+    
+    
+    # Get all ids from relational table with the id parameter
+    case type
+    when "Processors"
+        relationalResult = db.execute("SELECT DISTINCT #{requestedType} FROM Processors_Subjects_Links_Rel
+        WHERE processor_id = ? AND #{requestedType} IS NOT NULL", id)
+    when "Subjects"
+        relationalResult = db.execute("SELECT DISTINCT #{requestedType} FROM Processors_Subjects_Links_Rel
+        WHERE subject_id = ? AND #{requestedType} IS NOT NULL", id)
+    when "Links"
+        relationalResult = db.execute("SELECT DISTINCT #{requestedType} FROM Processors_Subjects_Links_Rel
+        WHERE link_id = ? AND #{requestedType} IS NOT NULL", id)
+    end
+
+    puts "Relation"
+    p relationalResult
+
+    db.results_as_hash = true
+    case requestedType
+    when "processor_id"
+        result = db.execute("SELECT name FROM Processors 
+        INNER JOIN #{relationalResult} ON Processors.id = #{relationalResult}.processor_id")
+        return result
+    when "subject_id"
+        result = db.execute("SELECT DISTINCT name FROM Subjects 
+        INNER JOIN #{relationalResult} ON Subjects.id = #{relationalResult}.subjects_id")
+        puts "Result"
+        p result
+        return result
+    when "link_id"
+        result = db.execute("SELECT name FROM Links 
+        INNER JOIN #{relationalResult} ON Links.id = #{relationalResult}.link_id")
+        return result
+    end
+
+end
+
+def addDBRelation(source, type, id, id_list)
+
+
+end
+
 def fetchInfo(source, type, id, column)
     db = SQLite3::Database.new(source)
 

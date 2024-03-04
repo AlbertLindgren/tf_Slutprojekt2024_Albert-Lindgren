@@ -4,3 +4,18 @@ form action="/processors/#{@id}/update" method="post"
     input# type="text" name="name" placeholder="Name"/
     textarea# name="content" cols="30" rows="10" placeholder="Description"
     input type="submit" value="Add"/
+
+h3 Add relations
+form action="/processors/#{@id}/update" method="post"
+    - @subjects.each do |subject|
+        input# type="checkbox" name="#{subject["name"]}" value="#{subject["id"]}"/
+
+
+h3 Existing Relations
+p.boldtext Subjects
+- @relSubjects.each do |subject|
+    p = subject["name"]
+
+p.boldtext Links
+- @relLinks.each do |link|
+    p = link["name"]
