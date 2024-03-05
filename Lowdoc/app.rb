@@ -37,10 +37,22 @@ get('/processors/:id/edit') do
     # Get relational info
     @relSubjects = getDBItemsWithRelId('db/lowdoc.db', 'Processors', 'subject_id', @id)
     @relLinks = getDBItemsWithRelId('db/lowdoc.db', 'Processors', 'link_id', @id)
+    # Id lists for checkbox
+    @relSubjectsIdList = []
+    @relSubjects.each do |subject|
+        @relSubjectsIdList.append(subject["id"])
+        puts "relelflfjnweufn"
+        puts @relSubjects
+    end
+    @relLinksIdList = []
+    @relLinks.each do |link|
+        @relLinksIdList.append(link["id"])
+    end
+    
 
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
     @links = getDBItems('db/lowdoc.db', 'Links')
-
+    
     slim(:"processors/edit")
 end
 
@@ -48,6 +60,11 @@ post('/processors/:id/update') do
     id = params[:id]
     name = params[:name]
     content = params[:content]
+    checkedSubjects = params[:checkedSubjects]
+    checkedLinks = params[:checkedLinks]
+    puts "CHECKS"
+    p checkedSubjects
+    p checkedLinks
 
     updateRecord('db/lowdoc.db', 'Processors', id, name, content)
     redirect('/processors')

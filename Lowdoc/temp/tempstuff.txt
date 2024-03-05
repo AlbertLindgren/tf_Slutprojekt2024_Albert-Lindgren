@@ -1,0 +1,9 @@
+h3 Existing Relations
+p.boldtext Subjects
+- @relSubjects.each do |subject|
+    p = subject["name"]
+
+
+p.boldtext Links
+- @relLinks.each do |link|
+    p = link["name"]

@@ -3,13 +3,38 @@ h2 Edit #{@name}
 form action="/processors/#{@id}/update" method="post"
     input# type="text" name="name" placeholder="Name"/
     textarea# name="content" cols="30" rows="10" placeholder="Description"
-    input type="submit" value="Add"/
-
-h3 Add relations
-form action="/processors/#{@id}/update" method="post"
+    br
+    h3 = "Edit relations"
+    p = "Subjects"
+    - n = 0
+    - checkedSubjects = []
     - @subjects.each do |subject|
-        input# type="checkbox" name="#{subject["name"]}" value="#{subject["id"]}"/
+        - if @relSubjectsIdList.include?(subject["id"])
+            input# type="checkbox" name="#{checkedSubjects[n]}" value="#{subject["id"]}" checked="true" /
+            label for="#{subject["id"]}" #{subject["name"]}
+            br
+        - elsif !(@relSubjectsIdList.include?(subject["id"]))
+            input# type="checkbox" name="#{checkedSubjects[n]}" value="#{subject["id"]}"/
+            label for="#{subject["id"]}" #{subject["name"]}
+            br
+        - n = n + 1
+    p = "Links"
+    - n = 0
+    - checkedLinks = []
+    - @links.each do |link|
+        - if @relLinksIdList.include?(link["id"])
+            input# type="checkbox" name="#{checkedLinks[n]}" value="#{link["id"]}" checked="true" /
+            label for="#{link["id"]}" #{link["name"]}
+            br
+        - elsif !(@relLinksIdList.include?(link["id"]))
+            input# type="checkbox" name="#{checkedLinks[n]}" value="#{link["id"]}"/
+            label for="#{link["id"]}" #{link["name"]}
+            br
+        - n = n + 1
+    br
+    input type="submit" value="Submit edit" class="BigSubmit"/
 
+h3 = @checkedSubjects
 
 h3 Existing Relations
 p.boldtext Subjects
@@ -18,4 +43,5 @@ p.boldtext Subjects
 
 p.boldtext Links
 - @relLinks.each do |link|
-    p = link["name"]
+    a href="#{link["source"]}" #{link["name"]}
+    br

@@ -31,7 +31,7 @@ def getDBItemsWithRelId(source, type, requestedType, id)
    # end
 
     db = SQLite3::Database.new(source)
-    
+    db.results_as_hash = true
     
     # Get all ids from relational table with the id parameter
     case type
@@ -49,21 +49,32 @@ def getDBItemsWithRelId(source, type, requestedType, id)
     puts "Relation"
     p relationalResult
 
-    db.results_as_hash = true
+    result = []
+    
     case requestedType
     when "processor_id"
-        result = db.execute("SELECT name FROM Processors 
-        INNER JOIN #{relationalResult} ON Processors.id = #{relationalResult}.processor_id")
+        relationalResult.each do |processor|
+            result.append(db.execute("SELECT name, id FROM Processors
+                WHERE id = ?", processor["processor_id"])[0])
+        end
+        puts "Result"
+        p result
         return result
     when "subject_id"
-        result = db.execute("SELECT DISTINCT name FROM Subjects 
-        INNER JOIN #{relationalResult} ON Subjects.id = #{relationalResult}.subjects_id")
+        relationalResult.each do |subject|
+            result.append(db.execute("SELECT name, id FROM Subjects
+                WHERE id = ?", subject["subject_id"])[0])
+        end
         puts "Result"
         p result
         return result
     when "link_id"
-        result = db.execute("SELECT name FROM Links 
-        INNER JOIN #{relationalResult} ON Links.id = #{relationalResult}.link_id")
+        relationalResult.each do |link|
+            result.append(db.execute("SELECT name, id, source FROM Links
+                WHERE id = ?", link["link_id"])[0])
+        end
+        puts "Result"
+        p result
         return result
     end
 
