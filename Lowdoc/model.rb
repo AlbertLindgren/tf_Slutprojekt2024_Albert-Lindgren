@@ -46,9 +46,6 @@ def getDBItemsWithRelId(source, type, requestedType, id)
         WHERE link_id = ? AND #{requestedType} IS NOT NULL", id)
     end
 
-    puts "Relation"
-    p relationalResult
-
     result = []
     
     case requestedType
@@ -57,24 +54,18 @@ def getDBItemsWithRelId(source, type, requestedType, id)
             result.append(db.execute("SELECT name, id FROM Processors
                 WHERE id = ?", processor["processor_id"])[0])
         end
-        puts "Result"
-        p result
         return result
     when "subject_id"
         relationalResult.each do |subject|
             result.append(db.execute("SELECT name, id FROM Subjects
                 WHERE id = ?", subject["subject_id"])[0])
         end
-        puts "Result"
-        p result
         return result
     when "link_id"
         relationalResult.each do |link|
             result.append(db.execute("SELECT name, id, source FROM Links
                 WHERE id = ?", link["link_id"])[0])
         end
-        puts "Result"
-        p result
         return result
     end
 
@@ -138,7 +129,7 @@ def deleteRecord(source, type, id)
     end
 end
 
-def updateRecord(source, type, id, name, content)
+def updateRecord(source, type, id, name, content, rel1, rel2)
     db = SQLite3::Database.new(source)
     
     case type
@@ -155,4 +146,23 @@ def updateRecord(source, type, id, name, content)
         db.execute("INSERT INTO #{type} (name,source) VALUES (?,?)",name,content)
 
     end
+
+    case rel1
+    when relProcessors
+        
+    when relSubjects
+
+    when relLinks
+
+    end
+
+    case rel2
+    when relProcessors
+
+    when relSubjects
+
+    when relLinks
+
+    end
+
 end

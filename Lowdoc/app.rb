@@ -41,15 +41,12 @@ get('/processors/:id/edit') do
     @relSubjectsIdList = []
     @relSubjects.each do |subject|
         @relSubjectsIdList.append(subject["id"])
-        puts "relelflfjnweufn"
-        puts @relSubjects
     end
     @relLinksIdList = []
     @relLinks.each do |link|
         @relLinksIdList.append(link["id"])
     end
     
-
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
     @links = getDBItems('db/lowdoc.db', 'Links')
     
@@ -60,13 +57,32 @@ post('/processors/:id/update') do
     id = params[:id]
     name = params[:name]
     content = params[:content]
-    checkedSubjects = params[:checkedSubjects]
-    checkedLinks = params[:checkedLinks]
-    puts "CHECKS"
-    p checkedSubjects
-    p checkedLinks
+    puts "parmamaem"
+    p params
 
-    updateRecord('db/lowdoc.db', 'Processors', id, name, content)
+    # Get ids of the related items
+    @subjects = getDBItems('db/lowdoc.db', 'Subjects')
+    @links = getDBItems('db/lowdoc.db', 'Links')
+
+    relSubjects = []
+    relLinks = []
+    params.each_key {|key| 
+        if key.class == String
+            @subjects.each do |subject|
+                if subject["name"] == key
+                    relSubjects.append(subject["id"])
+                end
+                
+            end
+            @links.each do |link|
+                if link["name"] == key
+                    relLinks.append(link["id"])
+                end
+            end
+        end
+    }
+
+    updateRecord('db/lowdoc.db', 'Processors', id, name, content, relSubjects, relLinks)
     redirect('/processors')
 end
 

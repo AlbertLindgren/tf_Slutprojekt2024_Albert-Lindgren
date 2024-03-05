@@ -6,31 +6,25 @@ form action="/processors/#{@id}/update" method="post"
     br
     h3 = "Edit relations"
     p = "Subjects"
-    - n = 0
-    - checkedSubjects = []
     - @subjects.each do |subject|
         - if @relSubjectsIdList.include?(subject["id"])
-            input# type="checkbox" name="#{checkedSubjects[n]}" value="#{subject["id"]}" checked="true" /
+            input# type="checkbox" name="#{subject["name"]}" value="#{subject["id"]}" checked="true" /
             label for="#{subject["id"]}" #{subject["name"]}
             br
         - elsif !(@relSubjectsIdList.include?(subject["id"]))
-            input# type="checkbox" name="#{checkedSubjects[n]}" value="#{subject["id"]}"/
+            input# type="checkbox" name="##{subject["name"]}" value="#{subject["id"]}"/
             label for="#{subject["id"]}" #{subject["name"]}
             br
-        - n = n + 1
     p = "Links"
-    - n = 0
-    - checkedLinks = []
     - @links.each do |link|
         - if @relLinksIdList.include?(link["id"])
-            input# type="checkbox" name="#{checkedLinks[n]}" value="#{link["id"]}" checked="true" /
+            input# type="checkbox" name="#{link["name"]}" value="#{link["id"]}" checked="true" /
             label for="#{link["id"]}" #{link["name"]}
             br
         - elsif !(@relLinksIdList.include?(link["id"]))
-            input# type="checkbox" name="#{checkedLinks[n]}" value="#{link["id"]}"/
+            input# type="checkbox" name="#{link["name"]}" value="#{link["id"]}"/
             label for="#{link["id"]}" #{link["name"]}
             br
-        - n = n + 1
     br
     input type="submit" value="Submit edit" class="BigSubmit"/
 
