@@ -12,7 +12,7 @@ form action="/processors/#{@id}/update" method="post"
             label for="#{subject["id"]}" #{subject["name"]}
             br
         - elsif !(@relSubjectsIdList.include?(subject["id"]))
-            input# type="checkbox" name="##{subject["name"]}" value="#{subject["id"]}"/
+            input# type="checkbox" name="#{subject["name"]}" value="#{subject["id"]}"/
             label for="#{subject["id"]}" #{subject["name"]}
             br
     p = "Links"
@@ -27,8 +27,6 @@ form action="/processors/#{@id}/update" method="post"
             br
     br
     input type="submit" value="Submit edit" class="BigSubmit"/
-
-h3 = @checkedSubjects
 
 h3 Existing Relations
 p.boldtext Subjects

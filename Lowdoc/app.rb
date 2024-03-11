@@ -57,9 +57,7 @@ post('/processors/:id/update') do
     id = params[:id]
     name = params[:name]
     content = params[:content]
-    puts "parmamaem"
-    p params
-
+    
     # Get ids of the related items
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
     @links = getDBItems('db/lowdoc.db', 'Links')
@@ -72,7 +70,6 @@ post('/processors/:id/update') do
                 if subject["name"] == key
                     relSubjects.append(subject["id"])
                 end
-                
             end
             @links.each do |link|
                 if link["name"] == key
@@ -115,11 +112,56 @@ get('/subjects/new') do
 end
 
 get('/subjects/:id/edit') do
+    @id = params[:id]
+    @name = fetchInfo('db/lowdoc.db', 'Subjects', @id, 'name')
 
+    # Get relational info
+    @relProcessors = getDBItemsWithRelId('db/lowdoc.db', 'Subjects', 'processor_id', @id)
+    @relLinks = getDBItemsWithRelId('db/lowdoc.db', 'Subjects', 'link_id', @id)
+    # Id lists for checkbox
+    @relProcessorsIdList = []
+    @relProcessors.each do |processor|
+        @relProcessorsIdList.append(processor["id"])
+    end
+    @relLinksIdList = []
+    @relLinks.each do |link|
+        @relLinksIdList.append(link["id"])
+    end
+    
+    @processors = getDBItems('db/lowdoc.db', 'Processors')
+    @links = getDBItems('db/lowdoc.db', 'Links')
+    
+    slim(:"subjects/edit")
 end
 
 post('/subjects/:id/update') do
+    id = params[:id]
+    name = params[:name]
+    content = params[:content]
 
+    # Get ids of the related items
+    @processors = getDBItems('db/lowdoc.db', 'Processors')
+    @links = getDBItems('db/lowdoc.db', 'Links')
+
+    relProcessors = []
+    relLinks = []
+    params.each_key {|key| 
+        if key.class == String
+            @processors.each do |processor|
+                if processor["name"] == key
+                    relProcessors.append(processor["id"])
+                end
+            end
+            @links.each do |link|
+                if link["name"] == key
+                    relLinks.append(link["id"])
+                end
+            end
+        end
+    }
+    
+    updateRecord('db/lowdoc.db', 'Subjects', id, name, content, relProcessors, relLinks)
+    redirect('/subjects')
 end
 
 post('/subjects/new') do
@@ -131,7 +173,9 @@ post('/subjects/new') do
 end
 
 post('/subjects/:id/delete') do
-
+    id = params[:id]
+    deleteRecord('db/lowdoc.db', 'Subjects', id)
+    redirect('/subjects')
 end
 
 #Searching and links
@@ -141,7 +185,7 @@ get('/browsing') do
 end
 
 get('/browsing/new') do
-
+    slim(:"browsing/new")
 end
 
 get('/browsing/:id/edit') do
@@ -153,7 +197,11 @@ post('/browsing/:id/update') do
 end
 
 post('/browsing/new') do
+    name = params[:name]
+    source = params[:source]
 
+    addRecord('db/lowdoc.db', 'Links', name, source)
+    redirect('/browsing')
 end
 
 post('/browsing/:id/delete') do

@@ -108,7 +108,6 @@ def addRecord(source, type, name, content)
         end
     when "Links"
         db.execute("INSERT INTO #{type} (name,source) VALUES (?,?)",name,content)
-
     end
 
 end
@@ -129,7 +128,7 @@ def deleteRecord(source, type, id)
     end
 end
 
-def updateRecord(source, type, id, name, content, rel1, rel2)
+def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
     db = SQLite3::Database.new(source)
     
     case type
@@ -140,29 +139,64 @@ def updateRecord(source, type, id, name, content, rel1, rel2)
             textfile = File.new("text/processors/[[#{id}]].txt", "w+")
             textfile.syswrite(content)
         end
+
+        db.execute("DELETE FROM Processors_Subjects_Links_Rel
+            WHERE processor_id = ?", id)
+
+        # For subjects
+        relProcOrSub.each do |relId|
+            # Add relations to subjects
+            db.execute("INSERT INTO Processors_Subjects_Links_Rel
+            (processor_id, subject_id) VALUES (?,?)", id, relId)
+        end
+        # For links
+        relLinkOrSub.each do |relId|
+            # Add relations to links
+            db.execute("INSERT INTO Processors_Subjects_Links_Rel
+            (processor_id, link_id) VALUES (?,?)", id, relId)
+        end
+
     when "Subjects"
-        db.execute("INSERT INTO #{type} (name) VALUES (?)",name)
-    when "Links"
-        db.execute("INSERT INTO #{type} (name,source) VALUES (?,?)",name,content)
-
-    end
-
-    case rel1
-    when relProcessors
+        db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
         
-    when relSubjects
+        if content != nil
+            textfile = File.new("text/subjects/[[#{id}]].txt", "w+")
+            textfile.syswrite(content)
+        end
 
-    when relLinks
+        db.execute("DELETE FROM Processors_Subjects_Links_Rel
+            WHERE subject_id = ?", id)
 
-    end
+        # For processors
+        relProcOrSub.each do |relId|
+            # Add relations to processors
+            db.execute("INSERT INTO Processors_Subjects_Links_Rel
+            (subject_id, processor_id) VALUES (?,?)", id, relId)
+        end
+        # For links
+        relLinkOrSub.each do |relId|
+            # Add relations to links
+            db.execute("INSERT INTO Processors_Subjects_Links_Rel
+            (subject_id, link_id) VALUES (?,?)", id, relId)
+        end
+    when "Links"
+        db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
 
-    case rel2
-    when relProcessors
+        db.execute("DELETE FROM Processors_Subjects_Links_Rel
+            WHERE link_id = ?", id)
 
-    when relSubjects
-
-    when relLinks
-
+        # For processors
+        relProcOrSub.each do |relId|
+            # Add relations to processors
+            db.execute("INSERT INTO Processors_Subjects_Links_Rel
+            (link_id, processor_id) VALUES (?,?)", id, relId)
+        end
+        # For subjects
+        relLinkOrSub.each do |relId|
+            # Add relations to subjects
+            db.execute("INSERT INTO Processors_Subjects_Links_Rel
+            (link_id, subject_id) VALUES (?,?)", id, relId)
+        end
     end
 
 end

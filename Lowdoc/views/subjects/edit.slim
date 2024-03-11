@@ -1,0 +1,39 @@
+h2 Edit #{@name}
+
+form action="/subjects/#{@id}/update" method="post"
+    input# type="text" name="name" placeholder="Name"/
+    textarea# name="content" cols="30" rows="10" placeholder="Description"
+    br
+    h3 = "Edit relations"
+    p = "Processors"
+    - @processors.each do |processor|
+        - if @relProcessorsIdList.include?(processor["id"])
+            input# type="checkbox" name="#{processor["name"]}" value="#{processor["id"]}" checked="true" /
+            label for="#{processor["id"]}" #{processor["name"]}
+            br
+        - elsif !(@relProcessorsIdList.include?(processor["id"]))
+            input# type="checkbox" name="#{processor["name"]}" value="#{processor["id"]}"/
+            label for="#{processor["id"]}" #{processor["name"]}
+            br
+    p = "Links"
+    - @links.each do |link|
+        - if @relLinksIdList.include?(link["id"])
+            input# type="checkbox" name="#{link["name"]}" value="#{link["id"]}" checked="true" /
+            label for="#{link["id"]}" #{link["name"]}
+            br
+        - elsif !(@relLinksIdList.include?(link["id"]))
+            input# type="checkbox" name="#{link["name"]}" value="#{link["id"]}"/
+            label for="#{link["id"]}" #{link["name"]}
+            br
+    br
+    input type="submit" value="Submit edit" class="BigSubmit"/
+
+h3 Existing Relations
+p.boldtext Processor
+- @relProcessors.each do |processor|
+    p = processor["name"]
+
+p.boldtext Links
+- @relLinks.each do |link|
+    a href="#{link["source"]}" #{link["name"]}
+    br
