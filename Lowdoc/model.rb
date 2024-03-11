@@ -181,6 +181,7 @@ def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
         end
     when "Links"
         db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
+        db.execute("UPDATE #{type} SET source = ? WHERE id = ?", source, id)
 
         db.execute("DELETE FROM Processors_Subjects_Links_Rel
             WHERE link_id = ?", id)

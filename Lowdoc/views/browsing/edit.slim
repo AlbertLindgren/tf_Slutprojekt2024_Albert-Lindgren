@@ -1,0 +1,43 @@
+br
+br
+h3 Edit
+a.bigLink href="#{@source}"  #{@name}
+
+form action="/browsing/#{@id}/update" method="post"
+    br
+    input# type="text" name="name" placeholder="Name"/
+    input# type="text" name="source" placeholder="https://example.com"/
+    br
+    h3 = "Edit relations"
+    p = "Processors"
+    - @processors.each do |processor|
+        - if @relProcessorsIdList.include?(processor["id"])
+            input# type="checkbox" name="#{processor["name"]}" value="#{processor["id"]}" checked="true" /
+            label for="#{processor["id"]}" #{processor["name"]}
+            br
+        - elsif !(@relProcessorsIdList.include?(processor["id"]))
+            input# type="checkbox" name="#{processor["name"]}" value="#{processor["id"]}"/
+            label for="#{processor["id"]}" #{processor["name"]}
+            br
+    p = "Subjects"
+    - @subjects.each do |subject|
+        - if @relSubjectsIdList.include?(subject["id"])
+            input# type="checkbox" name="#{subject["name"]}" value="#{subject["id"]}" checked="true" /
+            label for="#{subject["id"]}" #{subject["name"]}
+            br
+        - elsif !(@relSubjectsIdList.include?(subject["id"]))
+            input# type="checkbox" name="#{subject["name"]}" value="#{subject["id"]}"/
+            label for="#{subject["id"]}" #{subject["name"]}
+            br
+    br
+    input type="submit" value="Submit edit" class="BigSubmit"/
+
+h3 Existing Relations
+p.boldtext Processors
+- @relProcessors.each do |processor|
+    p = processor["name"]
+
+p.boldtext Subjects
+- @relSubjects.each do |subject|
+    p = subject["name"]
+    br

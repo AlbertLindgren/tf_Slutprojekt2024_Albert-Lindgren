@@ -189,11 +189,57 @@ get('/browsing/new') do
 end
 
 get('/browsing/:id/edit') do
+    @id = params[:id]
+    @name = fetchInfo('db/lowdoc.db', 'Links', @id, 'name')
+    @source = fetchInfo('db/lowdoc.db', 'Links', @id, 'source')
 
+    # Get relational info
+    @relProcessors = getDBItemsWithRelId('db/lowdoc.db', 'Links', 'processor_id', @id)
+    @relSubjects = getDBItemsWithRelId('db/lowdoc.db', 'Links', 'subject_id', @id)
+    # Id lists for checkbox
+    @relProcessorsIdList = []
+    @relProcessors.each do |processor|
+        @relProcessorsIdList.append(processor["id"])
+    end
+    @relSubjectsIdList = []
+    @relSubjects.each do |subject|
+        @relSubjectsIdList.append(subject["id"])
+    end
+    
+    @processors = getDBItems('db/lowdoc.db', 'Processors')
+    @subjects = getDBItems('db/lowdoc.db', 'Subjects')
+    
+    slim(:"browsing/edit")
 end
 
 post('/browsing/:id/update') do
+    id = params[:id]
+    name = params[:name]
+    source = params[:source]
 
+    # Get ids of the related items
+    @processors = getDBItems('db/lowdoc.db', 'Processors')
+    @subjects = getDBItems('db/lowdoc.db', 'Subjects')
+
+    relProcessors = []
+    relSubjects = []
+    params.each_key {|key| 
+        if key.class == String
+            @processors.each do |processor|
+                if processor["name"] == key
+                    relProcessors.append(processor["id"])
+                end
+            end
+            @subjects.each do |subject|
+                if subject["name"] == key
+                    relSubjects.append(subject["id"])
+                end
+            end
+        end
+    }
+    
+    updateRecord('db/lowdoc.db', 'Links', id, name, source, relProcessors, relSubjects)
+    redirect('/browsing')
 end
 
 post('/browsing/new') do
@@ -205,5 +251,7 @@ post('/browsing/new') do
 end
 
 post('/browsing/:id/delete') do
-
+    id = params[:id]
+    deleteRecord('db/lowdoc.db', 'Links', id)
+    redirect('/browsing')
 end

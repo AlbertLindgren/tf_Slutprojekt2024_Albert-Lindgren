@@ -3,7 +3,7 @@
 }
 
 h2 {
-    font-size: 4rem;
+    font-size: 3rem;
 }
 
 h3 {
@@ -30,4 +30,8 @@ input.BigSubmit {
     width: 200px;
     height: 100px;
     font-size: 2rem;
+}
+
+a.bigLink {
+    font-size: 2.0rem;
 }
