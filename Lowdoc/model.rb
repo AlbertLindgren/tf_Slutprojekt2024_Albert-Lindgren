@@ -1,6 +1,16 @@
 require 'sqlite3'
 require 'bcrypt'
 
+# Helper functions
+def get_file_as_string(filename)
+    data = ''
+    f = File.open(filename, "r")
+    f.each_line do |line|
+      data += line
+    end
+    return data
+  end
+
 def getDBItems(source, type)
     if source.class != String
         raise "Error, wrong datatype"
@@ -11,7 +21,7 @@ def getDBItems(source, type)
 
     db = SQLite3::Database.new(source)
     db.results_as_hash = true
-    
+
     result = db.execute("SELECT * FROM #{type}")
     return result
 end
@@ -32,7 +42,7 @@ def getDBItemsWithRelId(source, type, requestedType, id)
 
     db = SQLite3::Database.new(source)
     db.results_as_hash = true
-    
+
     # Get all ids from relational table with the id parameter
     case type
     when "Processors"
@@ -47,7 +57,7 @@ def getDBItemsWithRelId(source, type, requestedType, id)
     end
 
     result = []
-    
+
     case requestedType
     when "processor_id"
         relationalResult.each do |processor|
@@ -71,24 +81,33 @@ def getDBItemsWithRelId(source, type, requestedType, id)
 
 end
 
-def addDBRelation(source, type, id, id_list)
-
-
-end
-
 def fetchInfo(source, type, id, column)
     db = SQLite3::Database.new(source)
 
     return db.execute("SELECT #{column} FROM #{type} WHERE id = ?", id)
 end
 
+def fetchText(type, id)
+
+    case type
+    when "Processors"
+        if (File.file?("text/processors/[[#{id}]].txt"))
+            return get_file_as_string("text/processors/[[#{id}]].txt")
+        end
+    when "Subjects"
+        if (File.file?("text/subjects/[[#{id}]].txt"))
+            return get_file_as_string("text/subjects/[[#{id}]].txt")
+        end
+    end
+end
+
 def addRecord(source, type, name, content)
     # Validation
 
     #----------
-    
+
     db = SQLite3::Database.new(source)
-    
+
     case type
     when "Processors"
         db.execute("INSERT INTO #{type} (name) VALUES (?)",name)
@@ -130,7 +149,7 @@ end
 
 def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
     db = SQLite3::Database.new(source)
-    
+
     case type
     when "Processors"
         db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
@@ -158,7 +177,7 @@ def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
 
     when "Subjects"
         db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
-        
+
         if content != nil
             textfile = File.new("text/subjects/[[#{id}]].txt", "w+")
             textfile.syswrite(content)

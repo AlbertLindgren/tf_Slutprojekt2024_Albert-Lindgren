@@ -1,8 +1,8 @@
-h2 Edit #{@name}
+h2 Edit: #{@name[0][0]}
 
 form action="/subjects/#{@id}/update" method="post"
-    input# type="text" name="name" placeholder="Name"/
-    textarea# name="content" cols="30" rows="10" placeholder="Description"
+    input# type="text" name="name" value="#{@name[0][0]}"/
+    textarea# name="content" cols="30" rows="10" #{@content}
     br
     h3 = "Edit relations"
     p = "Processors"

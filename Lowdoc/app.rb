@@ -23,6 +23,10 @@ get('/processors') do
 end
 
 get('/processors/:id/show') do
+    @id = params[:id]
+    @name = fetchInfo('db/lowdoc.db', 'Processors', @id, 'name')
+    # Fetch description text
+    @content = fetchText('Processors', @id)
 
 end
 
@@ -33,6 +37,10 @@ end
 get('/processors/:id/edit') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', 'Processors', @id, 'name')
+    #@content = fetchInfo('db/lowdoc.db', 'Processors', @id, 'content')
+
+    # Fetch description text
+    @content = fetchText('Processors', @id)
 
     # Get relational info
     @relSubjects = getDBItemsWithRelId('db/lowdoc.db', 'Processors', 'subject_id', @id)
@@ -46,10 +54,10 @@ get('/processors/:id/edit') do
     @relLinks.each do |link|
         @relLinksIdList.append(link["id"])
     end
-    
+
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
     @links = getDBItems('db/lowdoc.db', 'Links')
-    
+
     slim(:"processors/edit")
 end
 
@@ -57,14 +65,14 @@ post('/processors/:id/update') do
     id = params[:id]
     name = params[:name]
     content = params[:content]
-    
+
     # Get ids of the related items
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
     @links = getDBItems('db/lowdoc.db', 'Links')
 
     relSubjects = []
     relLinks = []
-    params.each_key {|key| 
+    params.each_key {|key|
         if key.class == String
             @subjects.each do |subject|
                 if subject["name"] == key
@@ -86,7 +94,7 @@ end
 post('/processors/new') do
     name = params[:name]
     content = params[:content]
-    
+
     addRecord('db/lowdoc.db', 'Processors', name, content)
     redirect('/processors')
 end
@@ -115,6 +123,9 @@ get('/subjects/:id/edit') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', 'Subjects', @id, 'name')
 
+    # Fetch description text
+    @content = fetchText('Subjects', @id)
+
     # Get relational info
     @relProcessors = getDBItemsWithRelId('db/lowdoc.db', 'Subjects', 'processor_id', @id)
     @relLinks = getDBItemsWithRelId('db/lowdoc.db', 'Subjects', 'link_id', @id)
@@ -127,10 +138,10 @@ get('/subjects/:id/edit') do
     @relLinks.each do |link|
         @relLinksIdList.append(link["id"])
     end
-    
+
     @processors = getDBItems('db/lowdoc.db', 'Processors')
     @links = getDBItems('db/lowdoc.db', 'Links')
-    
+
     slim(:"subjects/edit")
 end
 
@@ -145,7 +156,7 @@ post('/subjects/:id/update') do
 
     relProcessors = []
     relLinks = []
-    params.each_key {|key| 
+    params.each_key {|key|
         if key.class == String
             @processors.each do |processor|
                 if processor["name"] == key
@@ -159,7 +170,7 @@ post('/subjects/:id/update') do
             end
         end
     }
-    
+
     updateRecord('db/lowdoc.db', 'Subjects', id, name, content, relProcessors, relLinks)
     redirect('/subjects')
 end
@@ -167,7 +178,7 @@ end
 post('/subjects/new') do
     name = params[:name]
     content = params[:content]
-    
+
     addRecord('db/lowdoc.db', 'Subjects', name, content)
     redirect('/subjects')
 end
@@ -205,10 +216,10 @@ get('/browsing/:id/edit') do
     @relSubjects.each do |subject|
         @relSubjectsIdList.append(subject["id"])
     end
-    
+
     @processors = getDBItems('db/lowdoc.db', 'Processors')
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
-    
+
     slim(:"browsing/edit")
 end
 
@@ -223,7 +234,7 @@ post('/browsing/:id/update') do
 
     relProcessors = []
     relSubjects = []
-    params.each_key {|key| 
+    params.each_key {|key|
         if key.class == String
             @processors.each do |processor|
                 if processor["name"] == key
@@ -237,7 +248,7 @@ post('/browsing/:id/update') do
             end
         end
     }
-    
+
     updateRecord('db/lowdoc.db', 'Links', id, name, source, relProcessors, relSubjects)
     redirect('/browsing')
 end
