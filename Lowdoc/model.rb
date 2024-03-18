@@ -220,3 +220,65 @@ def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
     end
 
 end
+
+#---------------------------------------------
+# Accounts
+
+def registerAccount(source, username, password)
+    db = SQLite3::Database.new(source)
+    # Validation
+    if username.class != String
+        raise "Error, wrong type for username"
+    end
+    if password.class != String
+        raise "Error, wrong type for password"
+    end
+
+    # Check if account already exists
+    result = db.execute("SELECT id FROM Users WHERE username=?", username)
+
+    # Create password hash with Bcrypt
+    if result.empty?
+        password_digest = BCrypt::Password.create(password)
+        db.execute("INSERT INTO Users
+            (username, password_digest, privilege) VALUES (?,?,'user')", username, password_digest)
+            return true
+    else
+        puts "Error, account already exists"
+        return false
+    end
+end
+
+def login(source, username, password)
+    db = SQLite3::Database.new(source)
+    # Validation
+    if username.class != String
+        raise "Error, wrong type for username"
+    end
+    if password.class != String
+        raise "Error, wrong type for password"
+    end
+
+    # Check if account exists
+    result = db.execute("SELECT id FROM Users WHERE username=?", username)
+
+    if !(result.empty?)
+        password_digest = (db.execute("SELECT password_digest FROM Users WHERE username=?", username))[0][0]
+        if BCrypt::Password.new(password_digest) == password
+            return true
+        else
+            return false
+        end
+    end
+
+end
+
+def fetchUserId(source, username)
+    db = SQLite3::Database.new(source)
+    return db.execute("SELECT id FROM Users WHERE username=?", username)[0][0]
+end
+
+def fetchPrivilege(source, id)
+    db = SQLite3::Database.new(source)
+    return db.execute("SELECT privilege FROM Users WHERE id=?", id)[0][0]
+end

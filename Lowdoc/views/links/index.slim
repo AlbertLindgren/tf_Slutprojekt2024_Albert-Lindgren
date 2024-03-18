@@ -1,11 +1,11 @@
 h2 Links
-a href="/browsing/new" Add Link
+a href="/links/new" Add Link
 br
 br
 - links.each do |link|
     a href="#{link["source"]}" #{link["name"]}
-    form method="get" action="/browsing/#{link["id"]}/edit"
+    form method="get" action="/links/#{link["id"]}/edit"
         br
         input type="submit" value="Edit"/
-    form method="post" action="browsing/#{link["id"]}/delete"
+    form method="post" action="links/#{link["id"]}/delete"
         input type="submit" value="Delete"/

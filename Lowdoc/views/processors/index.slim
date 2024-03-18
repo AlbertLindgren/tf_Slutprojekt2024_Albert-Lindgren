@@ -1,9 +1,11 @@
 h2 Processors
 a href="/processors/new" Add Processor
-
+br
 - processors.each do |processor|
-    h3 = processor["name"]
+    br
+    a.bigLink href="/processors/#{processor["id"]}/show" #{processor["name"]}
     form method="get" action="/processors/#{processor["id"]}/edit"
+        br
         input type="submit" value="Edit"/
     form method="post" action="processors/#{processor["id"]}/delete"
         input type="submit" value="Delete"/

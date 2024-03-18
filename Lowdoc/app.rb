@@ -16,6 +16,9 @@ get('/') do
     slim(:index)
 end
 
+# CRUD
+#---------------------------------------------------
+
 #Processors
 get('/processors') do
     result = getDBItems('db/lowdoc.db', 'Processors')
@@ -27,7 +30,7 @@ get('/processors/:id/show') do
     @name = fetchInfo('db/lowdoc.db', 'Processors', @id, 'name')
     # Fetch description text
     @content = fetchText('Processors', @id)
-
+    slim(:"processors/show")
 end
 
 get('/processors/new') do
@@ -190,16 +193,16 @@ post('/subjects/:id/delete') do
 end
 
 #Searching and links
-get('/browsing') do
+get('/links') do
     result = getDBItems('db/lowdoc.db', 'Links')
-    slim(:"browsing/index", locals:{links:result})
+    slim(:"links/index", locals:{links:result})
 end
 
-get('/browsing/new') do
-    slim(:"browsing/new")
+get('/links/new') do
+    slim(:"links/new")
 end
 
-get('/browsing/:id/edit') do
+get('/links/:id/edit') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', 'Links', @id, 'name')
     @source = fetchInfo('db/lowdoc.db', 'Links', @id, 'source')
@@ -220,10 +223,10 @@ get('/browsing/:id/edit') do
     @processors = getDBItems('db/lowdoc.db', 'Processors')
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
 
-    slim(:"browsing/edit")
+    slim(:"links/edit")
 end
 
-post('/browsing/:id/update') do
+post('/links/:id/update') do
     id = params[:id]
     name = params[:name]
     source = params[:source]
@@ -250,19 +253,69 @@ post('/browsing/:id/update') do
     }
 
     updateRecord('db/lowdoc.db', 'Links', id, name, source, relProcessors, relSubjects)
-    redirect('/browsing')
+    redirect('/links')
 end
 
-post('/browsing/new') do
+post('/links/new') do
     name = params[:name]
     source = params[:source]
 
     addRecord('db/lowdoc.db', 'Links', name, source)
-    redirect('/browsing')
+    redirect('/links')
 end
 
-post('/browsing/:id/delete') do
+post('/links/:id/delete') do
     id = params[:id]
     deleteRecord('db/lowdoc.db', 'Links', id)
-    redirect('/browsing')
+    redirect('/links')
+end
+
+# End of CRUD
+#-----------------------------------------------------------
+
+# Accounts
+
+get('/accounts/register') do
+
+
+    slim(:"/accounts/register")
+end
+
+get('/accounts/login') do
+
+
+    slim(:"/accounts/login")
+end
+
+post('/accounts/new') do
+    username = params[:username]
+    password = params[:password]
+    password_confirm = params[:password_confirm]
+
+    if password != password_confirm
+        redirect('/accounts/register')
+    end
+
+    if !registerAccount('db/lowdoc.db', username, password)
+        # Do something with sessions here, and maybe sinatra-flash
+        redirect('/accounts/register')
+    end
+
+    redirect('/')
+end
+
+post('/accounts/login') do
+    username = params[:username]
+    password = params[:password]
+
+    if login('db/lowdoc.db', username, password)
+       session[:user_id] = fetchUserId('db/lowdoc.db', username)
+       session[:user_privilege] = fetchPrivilege('db/lowdoc.db', session[:user_id])
+       session[:username] = username
+       session[:logged_in] = true
+    else
+        redirect('/accounts/login')
+    end
+
+    redirect('/')
 end

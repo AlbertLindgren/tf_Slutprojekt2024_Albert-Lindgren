@@ -3,7 +3,7 @@ br
 h3 Edit:
 a.bigLink href="#{@source}"  #{@name[0][0]}
 
-form action="/browsing/#{@id}/update" method="post"
+form action="/links/#{@id}/update" method="post"
     br
     input# type="text" name="name" value="#{@name[0][0]}"/
     input# type="text" name="source" placeholder="https://example.com"/

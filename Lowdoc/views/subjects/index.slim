@@ -1,9 +1,11 @@
 h2 Subjects
 a href="/subjects/new" Add Subjects
-
+br
 - subjects.each do |subject|
-    h3 = subject["name"]
+    br
+    a.bigLink href="/subjects/#{subject["id"]}/show" #{subject["name"]}
     form method="get" action="/subjects/#{subject["id"]}/edit"
+        br
         input type="submit" value="Edit"/
     form method="post" action="subjects/#{subject["id"]}/delete"
         input type="submit" value="Delete"/
