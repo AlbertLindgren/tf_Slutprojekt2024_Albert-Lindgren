@@ -320,6 +320,7 @@ post('/accounts/login') do
        session[:user_privilege] = fetchPrivilege('db/lowdoc.db', session[:user_id])
        session[:username] = username
        session[:logged_in] = true
+       flash[:login] = "Logged in"
        
     else
         redirect('/accounts/login')
