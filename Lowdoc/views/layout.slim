@@ -7,12 +7,32 @@ html lang="en"
         title Lowdoc
         
     body
+        - if session[:logged_in]
+            p.boldtext = "Welcome #{session[:username]}"
+
         a> href="/" Home
         a> href="/" About
-        a> href="/accounts/login" Log in
-        a> href="/accounts/register" Register
+        - if session[:logged_in]
+            form action="/accounts/logout" method="post"
+                br
+                br
+                input type="submit" value="Log out"/
+        - if !session[:logged_in]
+            a> href="/accounts/login" Log in
+            a> href="/accounts/register" Register
+       
+        - if flash[:unconfirmed_password]
+            p.notice = flash[:unconfirmed_password]
+        - if flash[:login]
+            p.notice = flash[:login]
+        - if flash[:logout]
+            p.notice = flash[:logout]
+        - if flash[:registered]
+            p.notice = flash[:registered]
         ==yield
-
+        
+ 
+        script src="/js/main.js" 
 
     footer
         

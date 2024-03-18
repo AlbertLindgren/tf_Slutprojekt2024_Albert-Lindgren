@@ -293,10 +293,17 @@ post('/accounts/new') do
     password_confirm = params[:password_confirm]
 
     if password != password_confirm
+        flash[:unconfirmed_password] = "The passwords do not match."
         redirect('/accounts/register')
     end
 
-    if !registerAccount('db/lowdoc.db', username, password)
+    if registerAccount('db/lowdoc.db', username, password)
+        session[:user_id] = fetchUserId('db/lowdoc.db', username)
+        session[:user_privilege] = fetchPrivilege('db/lowdoc.db', session[:user_id])
+        session[:username] = username
+        session[:logged_in] = true
+        flash[:registered] = "Registered and logged in"
+    else
         # Do something with sessions here, and maybe sinatra-flash
         redirect('/accounts/register')
     end
@@ -313,9 +320,16 @@ post('/accounts/login') do
        session[:user_privilege] = fetchPrivilege('db/lowdoc.db', session[:user_id])
        session[:username] = username
        session[:logged_in] = true
+       
     else
         redirect('/accounts/login')
     end
 
+    redirect('/')
+end
+
+post('/accounts/logout') do
+    session.clear
+    flash[:logout] = "Logged out"
     redirect('/')
 end

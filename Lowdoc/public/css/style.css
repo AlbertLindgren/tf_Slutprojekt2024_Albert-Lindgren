@@ -35,3 +35,14 @@ input.BigSubmit {
 a.bigLink {
     font-size: 2.0rem;
 }
+
+.notice {
+    background:rgba(63, 153, 45, 0.1);
+    width:30vw;
+    padding:50px;
+    bottom: 50px;
+    position:fixed;
+    bottom: 50px;
+    font-size:2rem;
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+}   
