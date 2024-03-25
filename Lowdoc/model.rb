@@ -140,10 +140,13 @@ def deleteRecord(source, type, id)
     case type
     when "Processors"
         db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE processor_id = ?", id)
+        db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE processor_id = ?", id)
     when "Subjects"
         db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", id)
+        db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE subject_id = ?", id)
     when "Links"
         db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE link_id = ?", id)
+        db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE link_id = ?", id)
     end
 end
 
@@ -308,19 +311,25 @@ def checkUserAccess(source, type, user_id, related_id)
     case type
     when "Processors"
         test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE processor_id=?", related_id)[0][0]
-        p "jmre"
-        p test_user_id
         if user_id == test_user_id
             return true
         else
             return false
         end
     when "Subjects"
-        subject_id = db.execute("SELECT id FROM Subjects ORDER BY id DESC LIMIT 1")[0][0]
-        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,subject_id) VALUES (?,?)", user_id, subject_id)
+        test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE subject_id=?", related_id)[0][0]
+        if user_id == test_user_id
+            return true
+        else
+            return false
+        end
     when "Links"
-        link_id = db.execute("SELECT id FROM Links ORDER BY id DESC LIMIT 1")[0][0]
-        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,link_id) VALUES (?,?)", user_id, link_id)
+        test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE link_id=?", related_id)[0][0]
+        if user_id == test_user_id
+            return true
+        else
+            return false
+        end
     end
 
     return false

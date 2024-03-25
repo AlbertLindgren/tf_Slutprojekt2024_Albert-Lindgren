@@ -37,6 +37,75 @@ before('/processors/:id/edit') do
         redirect('/processors')
     end
 end
+before('/processors/:id/delete') do 
+    id = params[:id]
+    if session[:logged_in] != true
+        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        redirect('/processors')
+    end
+    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Processors', session[:user_id], id))
+        flash[:unauthorized] = "You are not authorized to perform this action"
+        redirect('/processors')
+    end
+end
+
+before('/subjects/new') do 
+    if session[:logged_in] != true
+        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        redirect('/subjects')
+    end
+end
+before('/subjects/:id/edit') do 
+    id = params[:id]
+    if session[:logged_in] != true
+        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        redirect('/subjects')
+    end
+    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Subjects', session[:user_id], id))
+        flash[:unauthorized] = "You are not authorized to perform this action"
+        redirect('/subjects')
+    end
+end
+before('/subject/:id/delete') do 
+    id = params[:id]
+    if session[:logged_in] != true
+        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        redirect('/subject')
+    end
+    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Subjects', session[:user_id], id))
+        flash[:unauthorized] = "You are not authorized to perform this action"
+        redirect('/subject')
+    end
+end
+
+before('/links/new') do 
+    if session[:logged_in] != true
+        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        redirect('/links')
+    end
+end
+before('/links/:id/edit') do 
+    id = params[:id]
+    if session[:logged_in] != true
+        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        redirect('/links')
+    end
+    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Links', session[:user_id], id))
+        flash[:unauthorized] = "You are not authorized to perform this action"
+        redirect('/links')
+    end
+end
+before('/links/:id/delete') do 
+    id = params[:id]
+    if session[:logged_in] != true
+        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        redirect('/links')
+    end
+    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Links', session[:user_id], id))
+        flash[:unauthorized] = "You are not authorized to perform this action"
+        redirect('/links')
+    end
+end
 
 #Processors
 get('/processors') do
@@ -135,7 +204,11 @@ get('/subjects') do
 end
 
 get('/subjects/:id/show') do
-
+    @id = params[:id]
+    @name = fetchInfo('db/lowdoc.db', 'Subjects', @id, 'name')
+    # Fetch description text
+    @content = fetchText('Subjects', @id)
+    slim(:"subjects/show")
 end
 
 get('/subjects/new') do
@@ -203,6 +276,7 @@ post('/subjects/new') do
     content = params[:content]
 
     addRecord('db/lowdoc.db', 'Subjects', name, content)
+    addUserRelation('db/lowdoc.db', 'Subjects', session[:user_id])
     redirect('/subjects')
 end
 
@@ -281,6 +355,7 @@ post('/links/new') do
     source = params[:source]
 
     addRecord('db/lowdoc.db', 'Links', name, source)
+    addUserRelation('db/lowdoc.db', 'Links', session[:user_id])
     redirect('/links')
 end
 
