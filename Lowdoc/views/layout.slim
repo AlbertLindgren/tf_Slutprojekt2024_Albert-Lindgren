@@ -29,6 +29,12 @@ html lang="en"
             p.notice = flash[:logout]
         - if flash[:registered]
             p.notice = flash[:registered]
+        - if flash[:failed_login]
+            p.notice = flash[:failed_login]
+        - if flash[:not_logged_in]
+            p.notice = flash[:not_logged_in]
+        - if flash[:unauthorized]
+            p.notice = flash[:unauthorized]
         ==yield
         
  

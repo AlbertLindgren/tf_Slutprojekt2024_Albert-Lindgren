@@ -282,3 +282,46 @@ def fetchPrivilege(source, id)
     db = SQLite3::Database.new(source)
     return db.execute("SELECT privilege FROM Users WHERE id=?", id)[0][0]
 end
+
+def addUserRelation(source, type, user_id)
+    db = SQLite3::Database.new(source)
+    # Validation
+
+
+    case type
+    when "Processors"
+        processor_id = db.execute("SELECT id FROM Processors ORDER BY id DESC LIMIT 1")[0][0]
+        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,processor_id) VALUES (?,?)", user_id, processor_id)
+    when "Subjects"
+        subject_id = db.execute("SELECT id FROM Subjects ORDER BY id DESC LIMIT 1")[0][0]
+        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,subject_id) VALUES (?,?)", user_id, subject_id)
+    when "Links"
+        link_id = db.execute("SELECT id FROM Links ORDER BY id DESC LIMIT 1")[0][0]
+        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,link_id) VALUES (?,?)", user_id, link_id)
+    end
+end
+
+def checkUserAccess(source, type, user_id, related_id)
+    db = SQLite3::Database.new(source)
+    # Validation
+
+    case type
+    when "Processors"
+        test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE processor_id=?", related_id)[0][0]
+        p "jmre"
+        p test_user_id
+        if user_id == test_user_id
+            return true
+        else
+            return false
+        end
+    when "Subjects"
+        subject_id = db.execute("SELECT id FROM Subjects ORDER BY id DESC LIMIT 1")[0][0]
+        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,subject_id) VALUES (?,?)", user_id, subject_id)
+    when "Links"
+        link_id = db.execute("SELECT id FROM Links ORDER BY id DESC LIMIT 1")[0][0]
+        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,link_id) VALUES (?,?)", user_id, link_id)
+    end
+
+    return false
+end

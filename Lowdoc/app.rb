@@ -18,6 +18,25 @@ end
 
 # CRUD
 #---------------------------------------------------
+# Before block
+
+before('/processors/new') do 
+    if session[:logged_in] != true
+        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        redirect('/processors')
+    end
+end
+before('/processors/:id/edit') do 
+    id = params[:id]
+    if session[:logged_in] != true
+        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        redirect('/processors')
+    end
+    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Processors', session[:user_id], id))
+        flash[:unauthorized] = "You are not authorized to perform this action"
+        redirect('/processors')
+    end
+end
 
 #Processors
 get('/processors') do
@@ -99,6 +118,7 @@ post('/processors/new') do
     content = params[:content]
 
     addRecord('db/lowdoc.db', 'Processors', name, content)
+    addUserRelation('db/lowdoc.db', 'Processors', session[:user_id])
     redirect('/processors')
 end
 
@@ -323,6 +343,7 @@ post('/accounts/login') do
        flash[:login] = "Logged in"
        
     else
+        flash[:failed_login] = "Wrong information"
         redirect('/accounts/login')
     end
 
@@ -331,6 +352,7 @@ end
 
 post('/accounts/logout') do
     session.clear
+    session[:logged_in] = false
     flash[:logout] = "Logged out"
     redirect('/')
 end
