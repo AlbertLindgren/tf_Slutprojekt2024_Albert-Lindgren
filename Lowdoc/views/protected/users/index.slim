@@ -1,0 +1,10 @@
+h2 Users
+- #a href="/processors/new" Add Processor
+br
+- users.each do |user|
+    br
+    a.bigLink href="/users/#{user["id"]}/show" #{user["name"]}
+    form method="get" action="/users/#{user["id"]}/edit"
+        br
+    form method="post" action="users/#{user["id"]}/delete"
+        input type="submit" value="Delete"/

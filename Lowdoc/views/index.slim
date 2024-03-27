@@ -4,3 +4,5 @@ ol
     li: a href="/subjects" Subjects
     li: a href="/links" Links
     li: a href="/" Other
+    - if session[:user_privilege] == "admin" || session[:user_privilege] == "owner"
+        li: a href="/protected/accounts/index" Administer users

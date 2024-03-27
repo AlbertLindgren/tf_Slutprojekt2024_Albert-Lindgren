@@ -377,9 +377,15 @@ get('/accounts/register') do
 end
 
 get('/accounts/login') do
-
+    
 
     slim(:"/accounts/login")
+end
+
+get('/accounts/show') do
+    
+
+    slim(:"/accounts/show")
 end
 
 post('/accounts/new') do
@@ -430,4 +436,26 @@ post('/accounts/logout') do
     session[:logged_in] = false
     flash[:logout] = "Logged out"
     redirect('/')
+end
+
+# User management
+get('/protected/users/index') do
+    result = getDBItems('db/lowdoc.db', 'Users')
+    slim(:"/protected/users/index", locals:{users:result})
+end
+
+get('/protected/users/:id/show') do
+    #result = getDBItems('db/lowdoc.db', 'Users')
+    #slim(:"/protected/users/show", locals:{users:result})
+end
+
+post('/protected/users/:id/update') do
+    
+
+    redirect('/protected/users/index')
+end
+
+post('/protected/users/:id/delete') do
+
+    redirect('/protected/users/index')
 end
