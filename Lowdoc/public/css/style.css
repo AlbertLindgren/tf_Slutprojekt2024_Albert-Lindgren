@@ -46,3 +46,9 @@ a.bigLink {
     font-size:2rem;
     font-family: Verdana, Arial, Helvetica, sans-serif;
 }   
+
+.important {
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    font-size: 1.5rem;
+    font-style: italic;
+}

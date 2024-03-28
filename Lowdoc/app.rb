@@ -440,13 +440,18 @@ end
 
 # User management
 get('/protected/users/index') do
-    result = getDBItems('db/lowdoc.db', 'Users')
-    slim(:"/protected/users/index", locals:{users:result})
+    @owner = getColumn('db/lowdoc.db', "Users", "privilege", "owner")[0]
+    @admins = getColumn('db/lowdoc.db', "Users", "privilege", "admin")
+    @users = getColumn('db/lowdoc.db', "Users", "privilege", "user")
+
+    slim(:"/protected/users/index")
 end
 
 get('/protected/users/:id/show') do
-    #result = getDBItems('db/lowdoc.db', 'Users')
-    #slim(:"/protected/users/show", locals:{users:result})
+    @id = params[:id]
+    @name = fetchInfo('db/lowdoc.db', "Users", @id, "username")[0]
+
+    slim(:"/protected/users/show")
 end
 
 post('/protected/users/:id/update') do
@@ -456,6 +461,8 @@ post('/protected/users/:id/update') do
 end
 
 post('/protected/users/:id/delete') do
+    id = params[:id]
+    
 
     redirect('/protected/users/index')
 end

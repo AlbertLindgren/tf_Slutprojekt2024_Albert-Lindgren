@@ -1,9 +1,21 @@
 h2 Users
-- #a href="/processors/new" Add Processor
+h3 Owner
+a.important href="/protected/users/#{@owner["id"][0]}/show" #{@owner["username"]}
 br
-- users.each do |user|
+h3 Admins
+- @admins.each do |admin|
     br
-    a.bigLink href="/users/#{user["id"]}/show" #{user["name"]}
+    a.bigLink href="/protected/users/#{admin["id"]}/show" #{admin["username"]}
+    form method="get" action="/users/#{admin["id"]}/edit"
+        br
+    - if session["user_privilege"] == "owner"
+        form method="post" action="users/#{admin["id"]}/delete"
+            input type="submit" value="Delete"/
+br
+h3 Regular users
+- @users.each do |user|
+    br
+    a.bigLink href="/protected/users/#{user["id"]}/show" #{user["username"]}
     form method="get" action="/users/#{user["id"]}/edit"
         br
     form method="post" action="users/#{user["id"]}/delete"

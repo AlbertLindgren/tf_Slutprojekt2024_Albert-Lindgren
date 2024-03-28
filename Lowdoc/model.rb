@@ -26,6 +26,14 @@ def getDBItems(source, type)
     return result
 end
 
+def getColumn(source, type, column, requestedValue)
+    db = SQLite3::Database.new(source)
+    db.results_as_hash = true
+
+    result = db.execute("SELECT * FROM #{type} WHERE #{column} = ?", requestedValue)
+    return result
+end
+
 def getDBItemsWithRelId(source, type, requestedType, id)
     if source.class != String
         raise "Error, wrong datatype"
@@ -147,6 +155,8 @@ def deleteRecord(source, type, id)
     when "Links"
         db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE link_id = ?", id)
         db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE link_id = ?", id)
+    when "Users"
+        
     end
 end
 
