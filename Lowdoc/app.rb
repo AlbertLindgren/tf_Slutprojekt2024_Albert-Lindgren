@@ -463,6 +463,7 @@ end
 post('/protected/users/:id/delete') do
     id = params[:id]
     
+    deleteRecord('db/lowdoc.db', "Users", id)
 
     redirect('/protected/users/index')
 end

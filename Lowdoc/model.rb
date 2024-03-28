@@ -156,7 +156,7 @@ def deleteRecord(source, type, id)
         db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE link_id = ?", id)
         db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE link_id = ?", id)
     when "Users"
-        
+        db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE user_id = ?", id)
     end
 end
 
