@@ -1,5 +1,6 @@
 require 'sqlite3'
 require 'bcrypt'
+require 'time'
 
 # Helper functions
 def get_file_as_string(filename)
@@ -213,7 +214,7 @@ def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
         end
     when "Links"
         db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
-        db.execute("UPDATE #{type} SET source = ? WHERE id = ?", source, id)
+        db.execute("UPDATE #{type} SET source = ? WHERE id = ?", content, id)
 
         db.execute("DELETE FROM Processors_Subjects_Links_Rel
             WHERE link_id = ?", id)
@@ -230,6 +231,69 @@ def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
             db.execute("INSERT INTO Processors_Subjects_Links_Rel
             (link_id, subject_id) VALUES (?,?)", id, relId)
         end
+    end
+
+end
+
+def getFilteredItems(source, type, relProcOrSub, relLinkOrSub)
+    db = SQLite3::Database.new(source)
+    case type
+    when "Processors"
+        filteredProcessors = []
+        processors = db.execute("SELECT DISTINCT processor_id FROM Processors_Subjects_Links_Rel")
+
+        processors.each do |processor_id|
+            relProcOrSub.each do |subject_id|
+                if db.execute("SELECT processor_id FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", subject_id).include?(processor_id)
+                    filteredProcessors.append(processor_id)
+                end
+            end
+            
+            relLinkOrSub.each do |link_id|
+                if db.execute("SELECT processor_id FROM Processors_Subjects_Links_Rel WHERE link_id = ?", link_id).include?(processor_id)
+                    filteredProcessors.append(processor_id)
+                end
+            end
+        end
+        return filteredProcessors.uniq
+    when "Subjects"
+        filteredSubjects = []
+        subjects = db.execute("SELECT DISTINCT subject_id FROM Processors_Subjects_Links_Rel")
+
+        subjects.each do |subject_id|
+            relProcOrSub.each do |processor_id|
+                if db.execute("SELECT subject_id FROM Processors_Subjects_Links_Rel WHERE processor_id = ?", processor_id).include?(subject_id)
+                    filteredSubjects.append(subject_id)
+                end
+            end
+            
+            relLinkOrSub.each do |link_id|
+                if db.execute("SELECT subject_id FROM Processors_Subjects_Links_Rel WHERE link_id = ?", link_id).include?(subject_id)
+                    filteredSubjects.append(subject_id)
+                end
+            end
+        end
+
+        return filteredSubjects.uniq
+    when "Links"
+        filteredLinks = []
+        links = db.execute("SELECT DISTINCT link_id FROM Processors_Subjects_Links_Rel")
+
+        links.each do |link_id|
+            relProcOrSub.each do |processor_id|
+                if db.execute("SELECT link_id FROM Processors_Subjects_Links_Rel WHERE processor_id = ?", processor_id).include?(link_id)
+                    filteredLinks.append(link_id)
+                end
+            end
+            
+            relLinkOrSub.each do |subject_id|
+                if db.execute("SELECT link_id FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", subject_id).include?(link_id)
+                    filteredLinks.append(link_id)
+                end
+            end
+        end
+
+        return filteredLinks.uniq
     end
 
 end
@@ -299,7 +363,6 @@ end
 def addUserRelation(source, type, user_id)
     db = SQLite3::Database.new(source)
     # Validation
-
 
     case type
     when "Processors"

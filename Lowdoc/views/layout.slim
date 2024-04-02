@@ -35,6 +35,12 @@ html lang="en"
             p.notice = flash[:not_logged_in]
         - if flash[:unauthorized]
             p.notice = flash[:unauthorized]
+        - if flash[:failed_registration]
+            p.notice = flash[:failed_registration]
+        - if flash[:too_many_login_attempts]
+            p.notice = flash[:too_many_login_attempts]
+        - if flash[:try_again_later]
+            p.notice = flash[:try_again_later]
         ==yield
         
  

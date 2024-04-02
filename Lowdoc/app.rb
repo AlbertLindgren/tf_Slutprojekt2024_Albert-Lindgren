@@ -109,7 +109,11 @@ end
 
 #Processors
 get('/processors') do
+
     result = getDBItems('db/lowdoc.db', 'Processors')
+    @subjects = getDBItems('db/lowdoc.db', 'Subjects')
+    @links = getDBItems('db/lowdoc.db', 'Links')
+
     slim(:"processors/index", locals:{processors:result})
 end
 
@@ -197,9 +201,60 @@ post('/processors/:id/delete') do
     redirect('/processors')
 end
 
+post('/processors/filter') do
+    session[:filteredProcessors] = []
+    @subjects = getDBItems('db/lowdoc.db', 'Subjects')
+    @links = getDBItems('db/lowdoc.db', 'Links')
+
+    chosenSubjects = []
+    chosenLinks = []
+    params.each_key {|key|
+        if key.class == String
+            @subjects.each do |subject|
+                if subject["name"] == key
+                    chosenSubjects.append(subject["id"])
+                end
+            end
+            @links.each do |link|
+                if link["name"] == key
+                    chosenLinks.append(link["id"])
+                end
+            end
+        end
+    }
+    p "ewufhwe"
+    p chosenSubjects
+    p "jewfiuwh"
+    p chosenLinks
+
+    @filteredProcessors = getFilteredItems('db/lowdoc.db', 'Processors', chosenSubjects, chosenLinks)
+    p "fpåfe"
+    p @filteredProcessors
+    session[:chosenSubjects] = chosenSubjects
+    session[:chosenLinks] = chosenLinks
+
+    # Make it one dimensional
+    @filteredProcessors.each do |x|
+        session[:filteredProcessors].append(x[0])
+    end
+    p session[:filteredProcessors]
+
+    redirect('/processors')
+end
+
+post('/processors/filter/clear') do
+    session[:filteredProcessors] = nil
+    session[:chosenSubjects] = nil
+    session[:chosenLinks] = nil
+    redirect('/processors')
+end
+
 #Subjects
 get('/subjects') do
     result = getDBItems('db/lowdoc.db', 'Subjects')
+    @processors = getDBItems('db/lowdoc.db', 'Processors')
+    @links = getDBItems('db/lowdoc.db', 'Links')
+
     slim(:"subjects/index", locals:{subjects:result})
 end
 
@@ -286,9 +341,53 @@ post('/subjects/:id/delete') do
     redirect('/subjects')
 end
 
+post('/subjects/filter') do
+    session[:filteredSubjects] = []
+    @processors = getDBItems('db/lowdoc.db', 'Processors')
+    @links = getDBItems('db/lowdoc.db', 'Links')
+
+    chosenProcessors = []
+    chosenLinks = []
+    params.each_key {|key|
+        if key.class == String
+            @processors.each do |processor|
+                if processor["name"] == key
+                    chosenProcessors.append(processor["id"])
+                end
+            end
+            @links.each do |link|
+                if link["name"] == key
+                    chosenLinks.append(link["id"])
+                end
+            end
+        end
+    }
+
+    @filteredSubjects = getFilteredItems('db/lowdoc.db', 'Subjects', chosenProcessors, chosenLinks)
+    session[:chosenProcessors] = chosenProcessors
+    session[:chosenLinks] = chosenLinks
+
+    # Make it one dimensional
+    @filteredSubjects.each do |x|
+        session[:filteredSubjects].append(x[0])
+    end
+
+    redirect('/subjects')
+end
+
+post('/subjects/filter/clear') do
+    session[:filteredSubjects] = nil
+    session[:chosenProcessors] = nil
+    session[:chosenLinks] = nil
+    redirect('/subjects')
+end
+
 #Searching and links
 get('/links') do
     result = getDBItems('db/lowdoc.db', 'Links')
+    @processors = getDBItems('db/lowdoc.db', 'Processors')
+    @subjects = getDBItems('db/lowdoc.db', 'Subjects')
+
     slim(:"links/index", locals:{links:result})
 end
 
@@ -365,6 +464,47 @@ post('/links/:id/delete') do
     redirect('/links')
 end
 
+post('/links/filter') do
+    session[:filteredLinks] = []
+    @processors = getDBItems('db/lowdoc.db', 'Processors')
+    @subjects = getDBItems('db/lowdoc.db', 'Subjects')
+
+    chosenProcessors = []
+    chosenSubjects = []
+    params.each_key {|key|
+        if key.class == String
+            @processors.each do |processor|
+                if processor["name"] == key
+                    chosenProcessors.append(processor["id"])
+                end
+            end
+            @subjects.each do |subject|
+                if subject["name"] == key
+                    chosenSubjects.append(subject["id"])
+                end
+            end
+        end
+    }
+
+    @filteredLinks = getFilteredItems('db/lowdoc.db', 'Links', chosenProcessors, chosenSubjects)
+    session[:chosenProcessors] = chosenProcessors
+    session[:chosenSubjects] = chosenSubjects
+
+    # Make it one dimensional
+    @filteredLinks.each do |x|
+        session[:filteredLinks].append(x[0])
+    end
+
+    redirect('/links')
+end
+
+post('/links/filter/clear') do
+    session[:filteredLinks] = nil
+    session[:chosenProcessors] = nil
+    session[:chosenSubjects] = nil
+    redirect('/links')
+end
+
 # End of CRUD
 #-----------------------------------------------------------
 
@@ -406,23 +546,69 @@ post('/accounts/new') do
         flash[:registered] = "Registered and logged in"
     else
         # Do something with sessions here, and maybe sinatra-flash
+        flash[:failed_registration] = "Username already taken"
         redirect('/accounts/register')
     end
 
     redirect('/')
 end
 
+users = []
+User = Struct.new(:ip_address, :time, :attempts)
+cooldownTime = nil
+cooldown = false
+
 post('/accounts/login') do
+    # Limit login attempts to less than 10 attempts every three minutes
+    i = 0
+    index = 0
+    if users != []
+        users.each do |user|
+            if user.ip_address == request.ip
+                index = i
+            end
+            i += 1
+        end
+        if users[index] == nil
+            users.append(User.new(request.ip, Time.now, 0))
+            index = users.length() - 1
+        end
+    else
+        users[index] = User.new(request.ip, Time.now, 0)
+        users.append(users[index])
+    end
+
+    if cooldownTime != nil && (Time.now - cooldownTime) >= 600
+        users[index].time = Time.now
+        users[index].attempts = 1
+        cooldownTime = nil
+    end
+
+    if (Time.now - users[index].time) <= 180 && users[index].attempts <= 10
+        users[index].attempts += 1
+    elsif (Time.now - users[index].time) <= 180 && users[index].attempts >= 10 && !cooldown
+        cooldownTime = Time.now
+        cooldown = true
+        flash[:too_many_login_attempts] = "Exceeded attempt limit, try again in 10 minutes"
+        redirect('/accounts/login')
+    end
+
+    p "Login status"
+    p users[index].attempts
+    p Time.now - users[index].time
+
     username = params[:username]
     password = params[:password]
-
+    
     if login('db/lowdoc.db', username, password)
        session[:user_id] = fetchUserId('db/lowdoc.db', username)
        session[:user_privilege] = fetchPrivilege('db/lowdoc.db', session[:user_id])
        session[:username] = username
        session[:logged_in] = true
        flash[:login] = "Logged in"
-       
+    elsif cooldownTime != nil && (Time.now - cooldownTime) <= 600
+        flash[:try_again_later] = "Try again later"
+        redirect('/accounts/login')
     else
         flash[:failed_login] = "Wrong information"
         redirect('/accounts/login')

@@ -1,11 +1,55 @@
 h2 Subjects
 a href="/subjects/new" Add Subjects
 br
-- subjects.each do |subject|
+h3 Filter
+form method="post" action="subjects/filter/clear"
+            input type="submit" value="Clear filter"/
+form method="post" action="subjects/filter"
+    p = "Select processors:"
+    - @processors.each do |processor|
+        - if session[:chosenProcessors] == nil
+            input# type="checkbox" name="#{processor["name"]}" value="#{processor["id"]}" /
+            label for="#{processor["id"]}" #{processor["name"]}
+            br
+        - elsif session[:chosenProcessors].include?(processor["id"])
+            input# type="checkbox" name="#{processor["name"]}" value="#{processor["id"]}" checked="true"/
+            label for="#{processor["id"]}" #{processor["name"]}
+            br
+        - elsif !(session[:chosenProcessors].include?(processor["id"]))    
+            input# type="checkbox" name="#{processor["name"]}" value="#{processor["id"]}" /
+            label for="#{processor["id"]}" #{processor["name"]}
+            br
+    p = "Select links:"
+    - @links.each do |link|
+        - if session[:chosenLinks] == nil
+            input# type="checkbox" name="#{link["name"]}" value="#{link["id"]}" /
+            label for="#{link["id"]}" #{link["name"]}
+            br
+        - elsif session[:chosenLinks].include?(link["id"])
+            input# type="checkbox" name="#{link["name"]}" value="#{link["id"]}" checked="true"/
+            label for="#{link["id"]}" #{link["name"]}
+            br
+        - elsif !(session[:chosenLinks].include?(link["id"]))    
+            input# type="checkbox" name="#{link["name"]}" value="#{link["id"]}" /
+            label for="#{link["id"]}" #{link["name"]}
+            br
     br
-    a.bigLink href="/subjects/#{subject["id"]}/show" #{subject["name"]}
-    form method="get" action="/subjects/#{subject["id"]}/edit"
+    input type="submit" value="Filter" class=""/
+
+- subjects.each do |subject|
+    - if session[:filteredSubjects] == nil
         br
-        input type="submit" value="Edit"/
-    form method="post" action="subjects/#{subject["id"]}/delete"
-        input type="submit" value="Delete"/
+        a.bigLink href="/subjects/#{subject["id"]}/show" #{subject["name"]}
+        form method="get" action="/subjects/#{subject["id"]}/edit"
+            br
+            input type="submit" value="Edit"/
+        form method="post" action="subjects/#{subject["id"]}/delete"
+            input type="submit" value="Delete"/
+    - elsif session[:filteredSubjects].include?(subject["id"])
+        br
+        a.bigLink href="/subjects/#{subject["id"]}/show" #{subject["name"]}
+        form method="get" action="/subjects/#{subject["id"]}/edit"
+            br
+            input type="submit" value="Edit"/
+        form method="post" action="subjects/#{subject["id"]}/delete"
+            input type="submit" value="Delete"/

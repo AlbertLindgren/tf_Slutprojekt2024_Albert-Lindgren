@@ -7,3 +7,9 @@ p.boldtext Subjects
 p.boldtext Links
 - @relLinks.each do |link|
     p = link["name"]
+
+
+    filteredProcessors.push(*(db.execute("SELECT processor_id FROM Processors_Subjects_Links_Rel WHERE 
+                subject_id = ?", subject_id)[0]))
+                p "TEST"
+                p db.execute("SELECT processor_id FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", subject_id)[0]
