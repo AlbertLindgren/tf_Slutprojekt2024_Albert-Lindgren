@@ -27,7 +27,7 @@ module Model
     # Returns database items from specified table
     #
     # @param [String] source Path to database
-    # @param [String] type Database table 
+    # @param [String] type Relevant table
     #
     # @return [Hash] Hash containing the items
     def getDBItems(source, type)
@@ -45,6 +45,14 @@ module Model
         return result
     end
 
+    # Returns records with specified column value from specified table
+    #
+    # @param [String] source Path to database
+    # @param [String] type Relevant table
+    # @param [String] column Relevant column in table
+    # @param [String, Integer] requestedValue Requested value for the specified column
+    #
+    # @return [Hash] Hash containing the items
     def getColumn(source, type, column, requestedValue)
         if source.class != String
             raise "Error, wrong datatype"
@@ -55,9 +63,7 @@ module Model
         if column.class != String
             raise "Error, wrong datatype"
         end
-        if requestedValue.class != String
-          raise "Error, wrong datatype"
-        end
+
         db = SQLite3::Database.new(source)
         db.results_as_hash = true
 
@@ -65,6 +71,14 @@ module Model
         return result
     end
 
+    # Returns records of the requested type with relation to specified ID of another type
+    #
+    # @param [String] source Path to database
+    # @param [String] type Relevant table
+    # @param [String] requestedType The requested related table
+    # @param [Integer] id ID of the item whose relations are requested
+    #
+    # @return [Hash] Hash containing the items
     def getDBItemsWithRelId(source, type, requestedType, id)
         if source.class != String
             raise "Error, wrong datatype"
@@ -119,6 +133,14 @@ module Model
 
     end
 
+    # Returns specified column value of record with specified id and type
+    #
+    # @param [String] source Path to database
+    # @param [String] type Relevant table
+    # @param [Integer] id ID of the relevant record
+    # @param [String] column The wanted column
+    #
+    # @return [Array] Requested column value in array form
     def fetchInfo(source, type, id, column)
         if source.class != String
             raise "Error, wrong datatype"
@@ -138,6 +160,13 @@ module Model
         return db.execute("SELECT #{column} FROM #{type} WHERE id = ?", id)
     end
 
+    # Returns id of the user related to the specified record of specified type
+    #
+    # @param [String] source Path to database
+    # @param [String] type Relevant table
+    # @param [Integer] id Id of the relevant record
+    #
+    # @return [Array] Requested user ID in array form
     def fetchUserRelationalInfo(source, type, id)
         if source.class != String
             raise "Error, wrong datatype"
@@ -160,6 +189,12 @@ module Model
         end
     end
 
+    # Returns the text that belongs to the record of specified ID and type
+    #
+    # @param [String] type Relevant table
+    # @param [Integer] id Id of the relevant record
+    #
+    # @return [String] Requested text as a string
     def fetchText(type, id)
         if type.class != String
             raise "Error, wrong datatype"
@@ -180,6 +215,16 @@ module Model
         end
     end
 
+    # Creates a new record in specified table (type) and set name and either text or link depending on the type
+    #
+    # @param [String] source Path to database
+    # @param [String] type Relevant table
+    # @param [String] name Name in the new record
+    # @param [String] content Text or link depending on type
+    # @option content [String] Text of the created record
+    # @option content [String] Link of the created link-record
+    #
+    # @return [nil] Nothing
     def addRecord(source, type, name, content)
         # Validation
         if source.class != String
@@ -221,6 +266,13 @@ module Model
 
     end
 
+    # Deletes the record specified by type (table) and ID
+    #
+    # @param [String] source Path to database
+    # @param [String] type Relevant table
+    # @param [Integer] id ID of the record to delete
+    #
+    # @return [nil] Nothing
     def deleteRecord(source, type, id)
         if source.class != String
             raise "Error, wrong datatype"
@@ -252,6 +304,19 @@ module Model
         end
     end
 
+    # Updates the record specified by type (table) and ID
+    #
+    # @param [String] source Path to database
+    # @param [String] type Relevant table
+    # @param [Integer] id ID of the record to update
+    # @param [String] name New name of the record
+    # @param [String] content New text or link, depending on type
+    # @param [Array] relProcOrSub Array of ID:s of either related Processors or related Subjects, depending on type
+    # @param [Array] relLinkOrSub Array of ID:s of either related Links or related Subjects, depending on type
+    # @option content [String] Text if type is either Processors or Subjects
+    # @option content [String] Link if type is Links
+    #
+    # @return [nil] Nothing
     def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
         if source.class != String
             raise "Error, wrong datatype"
@@ -348,6 +413,14 @@ module Model
 
     end
 
+    # Returns the items that were filtered with related items from other tables (relProcOrSub and relLinkOrSub)
+    #
+    # @param [String] source Path to database
+    # @param [String] type Relevant table
+    # @param [Array] relProcOrSub Array of ID:s of either requested Processors or requested Subjects, depending on type
+    # @param [Array] relLinkOrSub Array of ID:s of either requested Links or requested Subjects, depending on type
+    #
+    # @return [Array] Array of filtered items
     def getFilteredItems(source, type, relProcOrSub, relLinkOrSub)
         if source.class != String
             raise "Error, wrong datatype"
@@ -427,6 +500,13 @@ module Model
     #---------------------------------------------
     # Accounts
 
+    # Registers an account
+    #
+    # @param [String] source Path to database
+    # @param [String] username Username to set
+    # @param [String] password Password to set
+    #
+    # @return [true,false] True if succesful, otherwise false
     def registerAccount(source, username, password)
         if source.class != String
             raise "Error, wrong datatype"
@@ -456,6 +536,13 @@ module Model
         end
     end
 
+    # Logs in a user
+    #
+    # @param [String] source Path to database
+    # @param [String] username Username to check
+    # @param [String] password Password to check
+    #
+    # @return [true,false] True if succesful, otherwise false
     def login(source, username, password)
         if source.class != String
             raise "Error, wrong datatype"
@@ -484,6 +571,13 @@ module Model
 
     end
 
+    # Fetches the ID of a user specified by username
+    #
+    # @param [String] source Path to database
+    # @param [String] username Username to check
+    # @param [String] password Password to check
+    #
+    # @return [Array] The requested user ID
     def fetchUserId(source, username)
         if source.class != String
             raise "Error, wrong datatype"
@@ -495,6 +589,12 @@ module Model
         return db.execute("SELECT id FROM Users WHERE username=?", username)[0][0]
     end
 
+    # Fetches the privilege of a user specified by ID
+    #
+    # @param [String] source Path to database
+    # @param [Integer] id ID of requested user
+    #
+    # @return [Array] The requested user ID
     def fetchPrivilege(source, id)
         if source.class != String
             raise "Error, wrong datatype"
@@ -506,6 +606,13 @@ module Model
         return db.execute("SELECT privilege FROM Users WHERE id=?", id)[0][0]
     end
 
+    # Adds a relation between a user and a record from another table
+    #
+    # @param [String] source Path to database
+    # @param [String] type Requested table to add a relation to
+    # @param [Integer] user_id ID of requested user
+    #
+    # @return [nil] Nothing
     def addUserRelation(source, type, user_id)
         if source.class != String
             raise "Error, wrong datatype"
@@ -532,7 +639,16 @@ module Model
         end
     end
 
+    # Checks whether the requested record belongs to the user specified by user_id
+    #
+    # @param [String] source Path to database
+    # @param [String] type Table with the relevant record
+    # @param [Integer] user_id ID of relevant user
+    # @param [Integer] related_id ID of relevant record
+    #
+    # @return [true,false] True if the record belongs to the user, otherwise false
     def checkUserAccess(source, type, user_id, related_id)
+        # Validation
         if source.class != String
             raise "Error, wrong datatype"
         end
@@ -547,8 +663,7 @@ module Model
         end
 
         db = SQLite3::Database.new(source)
-        # Validation
-
+ 
         case type
         when "Processors"
             test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE processor_id=?", related_id)[0][0]

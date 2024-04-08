@@ -9,6 +9,8 @@ enable :sessions
 
 include Model
 
+# Display Landing Page
+#
 get('/') do
     slim(:index)
 end
@@ -104,7 +106,10 @@ before('/links/:id/delete') do
     end
 end
 
-#Processors
+# Processors
+
+# Displays processors
+#
 get('/processors') do
 
     result = getDBItems('db/lowdoc.db', 'Processors')
@@ -114,6 +119,9 @@ get('/processors') do
     slim(:"processors/index", locals:{processors:result})
 end
 
+# Shows specific processors with related information
+#
+# @param [Integer] id, ID of the clicked processor
 get('/processors/:id/show') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', 'Processors', @id, 'name')
@@ -127,10 +135,15 @@ get('/processors/:id/show') do
     slim(:"processors/show")
 end
 
+# Displays a page for adding new processors
+#
 get('/processors/new') do
     slim(:"processors/new")
 end
 
+# Displays the edit options for the clicked processor
+#
+# @param [Integer] id, ID of the clicked processor
 get('/processors/:id/edit') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', 'Processors', @id, 'name')
@@ -158,6 +171,12 @@ get('/processors/:id/edit') do
     slim(:"processors/edit")
 end
 
+# Updates a processor
+#
+# @param [Integer] id, ID of the clicked processor
+# @param [String] name, Updated name of the processor
+# @param [String] content, Updated description of the processor
+# @param [Hash] params, Hash with names and values from the checkboxes
 post('/processors/:id/update') do
     id = params[:id]
     name = params[:name]
@@ -188,6 +207,10 @@ post('/processors/:id/update') do
     redirect('/processors')
 end
 
+# Adds a processor
+#
+# @param [String] name, Name of the added processor
+# @param [String] content, Description text of the added processor
 post('/processors/new') do
     name = params[:name]
     content = params[:content]
@@ -197,12 +220,18 @@ post('/processors/new') do
     redirect('/processors')
 end
 
+# Deletes a processor
+#
+# @param [Integer] id, ID of the clicked processor
 post('/processors/:id/delete') do
     id = params[:id]
     deleteRecord('db/lowdoc.db', 'Processors', id)
     redirect('/processors')
 end
 
+# Applies the filter on the index page for processors
+#
+# @param [Hash] params, Subjects and links selected through checkboxes
 post('/processors/filter') do
     session[:filteredProcessors] = []
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
@@ -224,14 +253,7 @@ post('/processors/filter') do
             end
         end
     }
-    p "ewufhwe"
-    p chosenSubjects
-    p "jewfiuwh"
-    p chosenLinks
-
     @filteredProcessors = getFilteredItems('db/lowdoc.db', 'Processors', chosenSubjects, chosenLinks)
-    p "fpåfe"
-    p @filteredProcessors
     session[:chosenSubjects] = chosenSubjects
     session[:chosenLinks] = chosenLinks
 
@@ -244,6 +266,8 @@ post('/processors/filter') do
     redirect('/processors')
 end
 
+# Clears the session variables that save the filter
+#
 post('/processors/filter/clear') do
     session[:filteredProcessors] = nil
     session[:chosenSubjects] = nil
@@ -251,7 +275,10 @@ post('/processors/filter/clear') do
     redirect('/processors')
 end
 
-#Subjects
+# Subjects
+
+# Displays subjects
+#
 get('/subjects') do
     result = getDBItems('db/lowdoc.db', 'Subjects')
     @processors = getDBItems('db/lowdoc.db', 'Processors')
@@ -260,6 +287,9 @@ get('/subjects') do
     slim(:"subjects/index", locals:{subjects:result})
 end
 
+# Shows specific subjects with related information
+#
+# @param [Integer] id, ID of the clicked subject
 get('/subjects/:id/show') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', 'Subjects', @id, 'name')
@@ -268,10 +298,15 @@ get('/subjects/:id/show') do
     slim(:"subjects/show")
 end
 
+# Displays a page for adding new subject
+#
 get('/subjects/new') do
     slim(:"subjects/new")
 end
 
+# Displays the edit options for the clicked subject
+#
+# @param [Integer] id, ID of the clicked subject
 get('/subjects/:id/edit') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', 'Subjects', @id, 'name')
@@ -298,6 +333,12 @@ get('/subjects/:id/edit') do
     slim(:"subjects/edit")
 end
 
+# Updates a subject
+#
+# @param [Integer] id, ID of the clicked subject
+# @param [String] name, New name of the clicked subject
+# @param [String] content, New description of the clicked subject
+# @param [Hash] params, Hash with names and values from the checkboxes
 post('/subjects/:id/update') do
     id = params[:id]
     name = params[:name]
@@ -328,6 +369,10 @@ post('/subjects/:id/update') do
     redirect('/subjects')
 end
 
+# Adds a subject
+#
+# @param [String] name, Name of the added subject
+# @param [String] content, Description of the added subject
 post('/subjects/new') do
     name = params[:name]
     content = params[:content]
@@ -337,12 +382,18 @@ post('/subjects/new') do
     redirect('/subjects')
 end
 
+# Deletes a subject
+#
+# @param [Integer] id, ID of the clicked subject
 post('/subjects/:id/delete') do
     id = params[:id]
     deleteRecord('db/lowdoc.db', 'Subjects', id)
     redirect('/subjects')
 end
 
+# Applies the filter on the index page for subjects
+#
+# @param [Hash] params, Processors and links selected through checkboxes
 post('/subjects/filter') do
     session[:filteredSubjects] = []
     @processors = getDBItems('db/lowdoc.db', 'Processors')
@@ -377,6 +428,8 @@ post('/subjects/filter') do
     redirect('/subjects')
 end
 
+# Clears the session variables that save the filter
+#
 post('/subjects/filter/clear') do
     session[:filteredSubjects] = nil
     session[:chosenProcessors] = nil
@@ -384,7 +437,10 @@ post('/subjects/filter/clear') do
     redirect('/subjects')
 end
 
-#Searching and links
+# Links
+
+# Displays links
+#
 get('/links') do
     result = getDBItems('db/lowdoc.db', 'Links')
     @processors = getDBItems('db/lowdoc.db', 'Processors')
@@ -393,10 +449,15 @@ get('/links') do
     slim(:"links/index", locals:{links:result})
 end
 
+# Displays a page for adding new links
+#
 get('/links/new') do
     slim(:"links/new")
 end
 
+# Displays the edit options for the clicked link
+#
+# @param [Integer] id, ID of the clicked link
 get('/links/:id/edit') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', 'Links', @id, 'name')
@@ -421,6 +482,12 @@ get('/links/:id/edit') do
     slim(:"links/edit")
 end
 
+# Updates a link
+#
+# @param [Integer] id, ID of the clicked link
+# @param [String] name, Updated name of the link
+# @param [String] source, Updated link (url) of the link
+# @param [Hash] params, Hash with names and values from the checkboxes
 post('/links/:id/update') do
     id = params[:id]
     name = params[:name]
@@ -451,6 +518,10 @@ post('/links/:id/update') do
     redirect('/links')
 end
 
+# Adds a link
+#
+# @param [String] name, Name of the added link
+# @param [String] source, Link (url)
 post('/links/new') do
     name = params[:name]
     source = params[:source]
@@ -460,12 +531,18 @@ post('/links/new') do
     redirect('/links')
 end
 
+# Deletes a link
+#
+# @param [Integer] id, ID of the clicked link
 post('/links/:id/delete') do
     id = params[:id]
     deleteRecord('db/lowdoc.db', 'Links', id)
     redirect('/links')
 end
 
+# Applies the filter on the index page for links
+#
+# @param [Hash] params, Processors and Subjects selected through checkboxes
 post('/links/filter') do
     session[:filteredLinks] = []
     @processors = getDBItems('db/lowdoc.db', 'Processors')
@@ -500,6 +577,8 @@ post('/links/filter') do
     redirect('/links')
 end
 
+# Clears the session variables that save the filter
+#
 post('/links/filter/clear') do
     session[:filteredLinks] = nil
     session[:chosenProcessors] = nil
@@ -512,24 +591,27 @@ end
 
 # Accounts
 
+# Displays the page for registering an account
+#
 get('/accounts/register') do
 
 
     slim(:"/accounts/register")
 end
 
+# Displays the page for logging in
+#
 get('/accounts/login') do
     
 
     slim(:"/accounts/login")
 end
 
-get('/accounts/show') do
-    
-
-    slim(:"/accounts/show")
-end
-
+# Registers an account
+#
+# @param [String] username, Username inputted by user
+# @param [String] password, Password inputted by user
+# @param [String] password_confirm, Password confirmation, inputted by user
 post('/accounts/new') do
     username = params[:username]
     password = params[:password]
@@ -560,6 +642,10 @@ User = Struct.new(:ip_address, :time, :attempts)
 cooldownTime = nil
 cooldown = false
 
+# Logs in user
+#
+# @param [String] username, Username inputted by user
+# @param [String] password, Password inputted by user
 post('/accounts/login') do
     # Limit login attempts to not more than 10 attempts every three minutes
     i = 0
@@ -595,10 +681,6 @@ post('/accounts/login') do
         redirect('/accounts/login')
     end
 
-    p "Login status"
-    p users[index].attempts
-    p Time.now - users[index].time
-
     username = params[:username]
     password = params[:password]
     
@@ -619,6 +701,8 @@ post('/accounts/login') do
     redirect('/')
 end
 
+# Logs out a user
+#
 post('/accounts/logout') do
     session.clear
     session[:logged_in] = false
@@ -627,6 +711,9 @@ post('/accounts/logout') do
 end
 
 # User management
+
+# Displays accounts
+#
 get('/protected/users/index') do
     @owner = getColumn('db/lowdoc.db', "Users", "privilege", "owner")[0]
     @admins = getColumn('db/lowdoc.db', "Users", "privilege", "admin")
@@ -635,6 +722,9 @@ get('/protected/users/index') do
     slim(:"/protected/users/index")
 end
 
+# Displays specific user
+#
+# @param [Integer] id, ID of clicked user
 get('/protected/users/:id/show') do
     @id = params[:id]
     @name = fetchInfo('db/lowdoc.db', "Users", @id, "username")[0]
@@ -642,12 +732,9 @@ get('/protected/users/:id/show') do
     slim(:"/protected/users/show")
 end
 
-post('/protected/users/:id/update') do
-    
-
-    redirect('/protected/users/index')
-end
-
+# Delete user
+#
+# @param [Integer] id, ID of clicked user
 post('/protected/users/:id/delete') do
     id = params[:id]
     
