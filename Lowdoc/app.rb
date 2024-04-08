@@ -5,12 +5,9 @@ require 'sinatra/flash'
 
 require_relative "model.rb"
 
-# Hashes containing text for procesors and subjects, ids used as keys
-#processors_desc = Hash.new
-#subjects_desc = Hash.new
-# Save paths to text, '/public/text/processors/1.txt'
-
 enable :sessions
+
+include Model
 
 get('/') do
     slim(:index)
@@ -66,15 +63,15 @@ before('/subjects/:id/edit') do
         redirect('/subjects')
     end
 end
-before('/subject/:id/delete') do 
+before('/subjects/:id/delete') do 
     id = params[:id]
     if session[:logged_in] != true
         flash[:not_logged_in] = "You need to be logged in to perform this action"
-        redirect('/subject')
+        redirect('/subjects')
     end
     if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Subjects', session[:user_id], id))
         flash[:unauthorized] = "You are not authorized to perform this action"
-        redirect('/subject')
+        redirect('/subjects')
     end
 end
 
@@ -122,6 +119,11 @@ get('/processors/:id/show') do
     @name = fetchInfo('db/lowdoc.db', 'Processors', @id, 'name')
     # Fetch description text
     @content = fetchText('Processors', @id)
+
+    # Fetch name of author
+    author_id = fetchUserRelationalInfo('db/lowdoc.db', 'Processors', @id)
+    @author = fetchInfo('db/lowdoc.db', 'users', author_id, 'username')
+
     slim(:"processors/show")
 end
 
@@ -559,7 +561,7 @@ cooldownTime = nil
 cooldown = false
 
 post('/accounts/login') do
-    # Limit login attempts to less than 10 attempts every three minutes
+    # Limit login attempts to not more than 10 attempts every three minutes
     i = 0
     index = 0
     if users != []

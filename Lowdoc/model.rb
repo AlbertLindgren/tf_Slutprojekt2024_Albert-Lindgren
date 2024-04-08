@@ -2,408 +2,578 @@ require 'sqlite3'
 require 'bcrypt'
 require 'time'
 
-# Helper functions
-def get_file_as_string(filename)
-    data = ''
-    f = File.open(filename, "r")
-    f.each_line do |line|
-      data += line
-    end
-    return data
-  end
+module Model
 
-def getDBItems(source, type)
-    if source.class != String
-        raise "Error, wrong datatype"
-    end
-    if type.class != String
-        raise "Error, wrong datatype"
-    end
-
-    db = SQLite3::Database.new(source)
-    db.results_as_hash = true
-
-    result = db.execute("SELECT * FROM #{type}")
-    return result
-end
-
-def getColumn(source, type, column, requestedValue)
-    db = SQLite3::Database.new(source)
-    db.results_as_hash = true
-
-    result = db.execute("SELECT * FROM #{type} WHERE #{column} = ?", requestedValue)
-    return result
-end
-
-def getDBItemsWithRelId(source, type, requestedType, id)
-    if source.class != String
-        raise "Error, wrong datatype"
-    end
-    if type.class != String
-        raise "Error, wrong datatype"
-    end
-    if requestedType.class != String
-        raise "Error, wrong datatype"
-    end
-  #  if id.class != Integer
-   #     raise "Error, wrong datatype"
-   # end
-
-    db = SQLite3::Database.new(source)
-    db.results_as_hash = true
-
-    # Get all ids from relational table with the id parameter
-    case type
-    when "Processors"
-        relationalResult = db.execute("SELECT DISTINCT #{requestedType} FROM Processors_Subjects_Links_Rel
-        WHERE processor_id = ? AND #{requestedType} IS NOT NULL", id)
-    when "Subjects"
-        relationalResult = db.execute("SELECT DISTINCT #{requestedType} FROM Processors_Subjects_Links_Rel
-        WHERE subject_id = ? AND #{requestedType} IS NOT NULL", id)
-    when "Links"
-        relationalResult = db.execute("SELECT DISTINCT #{requestedType} FROM Processors_Subjects_Links_Rel
-        WHERE link_id = ? AND #{requestedType} IS NOT NULL", id)
-    end
-
-    result = []
-
-    case requestedType
-    when "processor_id"
-        relationalResult.each do |processor|
-            result.append(db.execute("SELECT name, id FROM Processors
-                WHERE id = ?", processor["processor_id"])[0])
+    # Helper functions
+	
+	# Returns file as a string
+    #
+    # @param [String] filename Filename/filepath
+    #
+    # @return [String] String containing the file data
+    def get_file_as_string(filename)
+        if filename.class != String
+            raise "Error, wrong datatype"
         end
-        return result
-    when "subject_id"
-        relationalResult.each do |subject|
-            result.append(db.execute("SELECT name, id FROM Subjects
-                WHERE id = ?", subject["subject_id"])[0])
+        
+        data = ''
+        f = File.open(filename, "r")
+        f.each_line do |line|
+        data += line
         end
-        return result
-    when "link_id"
-        relationalResult.each do |link|
-            result.append(db.execute("SELECT name, id, source FROM Links
-                WHERE id = ?", link["link_id"])[0])
+        return data
+    end
+
+    # Returns database items from specified table
+    #
+    # @param [String] source Path to database
+    # @param [String] type Database table 
+    #
+    # @return [Hash] Hash containing the items
+    def getDBItems(source, type)
+        if source.class != String
+            raise "Error, wrong datatype"
         end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+
+        db = SQLite3::Database.new(source)
+        db.results_as_hash = true
+
+        result = db.execute("SELECT * FROM #{type}")
         return result
     end
 
-end
-
-def fetchInfo(source, type, id, column)
-    db = SQLite3::Database.new(source)
-
-    return db.execute("SELECT #{column} FROM #{type} WHERE id = ?", id)
-end
-
-def fetchText(type, id)
-
-    case type
-    when "Processors"
-        if (File.file?("text/processors/[[#{id}]].txt"))
-            return get_file_as_string("text/processors/[[#{id}]].txt")
+    def getColumn(source, type, column, requestedValue)
+        if source.class != String
+            raise "Error, wrong datatype"
         end
-    when "Subjects"
-        if (File.file?("text/subjects/[[#{id}]].txt"))
-            return get_file_as_string("text/subjects/[[#{id}]].txt")
+        if type.class != String
+            raise "Error, wrong datatype"
         end
-    end
-end
-
-def addRecord(source, type, name, content)
-    # Validation
-
-    #----------
-
-    db = SQLite3::Database.new(source)
-
-    case type
-    when "Processors"
-        db.execute("INSERT INTO #{type} (name) VALUES (?)",name)
-
-        if content != nil
-            id = db.execute("SELECT id FROM #{type} ORDER BY id DESC LIMIT 1")
-            textfile = File.new("text/processors/#{id}.txt", "w+")
-            textfile.syswrite(content)
+        if column.class != String
+            raise "Error, wrong datatype"
         end
-    when "Subjects"
-        db.execute("INSERT INTO #{type} (name) VALUES (?)",name)
-
-        if content != nil
-            id = db.execute("SELECT id FROM #{type} ORDER BY id DESC LIMIT 1")
-            textfile = File.new("text/subjects/#{id}.txt", "w+")
-            textfile.syswrite(content)
+        if requestedValue.class != String
+          raise "Error, wrong datatype"
         end
-    when "Links"
-        db.execute("INSERT INTO #{type} (name,source) VALUES (?,?)",name,content)
+        db = SQLite3::Database.new(source)
+        db.results_as_hash = true
+
+        result = db.execute("SELECT * FROM #{type} WHERE #{column} = ?", requestedValue)
+        return result
     end
 
-end
+    def getDBItemsWithRelId(source, type, requestedType, id)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if requestedType.class != String
+            raise "Error, wrong datatype"
+        end
+        if id.class != Integer
+          raise "Error, wrong datatype"
+        end
+        db = SQLite3::Database.new(source)
+        db.results_as_hash = true
 
-def deleteRecord(source, type, id)
-    db = SQLite3::Database.new(source)
-
-    db.execute("DELETE FROM #{type} WHERE id = ?", id)
-
-    # Relational table deletion
-    case type
-    when "Processors"
-        db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE processor_id = ?", id)
-        db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE processor_id = ?", id)
-    when "Subjects"
-        db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", id)
-        db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE subject_id = ?", id)
-    when "Links"
-        db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE link_id = ?", id)
-        db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE link_id = ?", id)
-    when "Users"
-        db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE user_id = ?", id)
-    end
-end
-
-def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
-    db = SQLite3::Database.new(source)
-
-    case type
-    when "Processors"
-        db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
-
-        if content != nil
-            textfile = File.new("text/processors/[[#{id}]].txt", "w+")
-            textfile.syswrite(content)
+        # Get all ids from relational table with the id parameter
+        case type
+        when "Processors"
+            relationalResult = db.execute("SELECT DISTINCT #{requestedType} FROM Processors_Subjects_Links_Rel
+            WHERE processor_id = ? AND #{requestedType} IS NOT NULL", id)
+        when "Subjects"
+            relationalResult = db.execute("SELECT DISTINCT #{requestedType} FROM Processors_Subjects_Links_Rel
+            WHERE subject_id = ? AND #{requestedType} IS NOT NULL", id)
+        when "Links"
+            relationalResult = db.execute("SELECT DISTINCT #{requestedType} FROM Processors_Subjects_Links_Rel
+            WHERE link_id = ? AND #{requestedType} IS NOT NULL", id)
         end
 
-        db.execute("DELETE FROM Processors_Subjects_Links_Rel
-            WHERE processor_id = ?", id)
+        result = []
 
-        # For subjects
-        relProcOrSub.each do |relId|
-            # Add relations to subjects
-            db.execute("INSERT INTO Processors_Subjects_Links_Rel
-            (processor_id, subject_id) VALUES (?,?)", id, relId)
-        end
-        # For links
-        relLinkOrSub.each do |relId|
-            # Add relations to links
-            db.execute("INSERT INTO Processors_Subjects_Links_Rel
-            (processor_id, link_id) VALUES (?,?)", id, relId)
-        end
-
-    when "Subjects"
-        db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
-
-        if content != nil
-            textfile = File.new("text/subjects/[[#{id}]].txt", "w+")
-            textfile.syswrite(content)
-        end
-
-        db.execute("DELETE FROM Processors_Subjects_Links_Rel
-            WHERE subject_id = ?", id)
-
-        # For processors
-        relProcOrSub.each do |relId|
-            # Add relations to processors
-            db.execute("INSERT INTO Processors_Subjects_Links_Rel
-            (subject_id, processor_id) VALUES (?,?)", id, relId)
-        end
-        # For links
-        relLinkOrSub.each do |relId|
-            # Add relations to links
-            db.execute("INSERT INTO Processors_Subjects_Links_Rel
-            (subject_id, link_id) VALUES (?,?)", id, relId)
-        end
-    when "Links"
-        db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
-        db.execute("UPDATE #{type} SET source = ? WHERE id = ?", content, id)
-
-        db.execute("DELETE FROM Processors_Subjects_Links_Rel
-            WHERE link_id = ?", id)
-
-        # For processors
-        relProcOrSub.each do |relId|
-            # Add relations to processors
-            db.execute("INSERT INTO Processors_Subjects_Links_Rel
-            (link_id, processor_id) VALUES (?,?)", id, relId)
-        end
-        # For subjects
-        relLinkOrSub.each do |relId|
-            # Add relations to subjects
-            db.execute("INSERT INTO Processors_Subjects_Links_Rel
-            (link_id, subject_id) VALUES (?,?)", id, relId)
-        end
-    end
-
-end
-
-def getFilteredItems(source, type, relProcOrSub, relLinkOrSub)
-    db = SQLite3::Database.new(source)
-    case type
-    when "Processors"
-        filteredProcessors = []
-        processors = db.execute("SELECT DISTINCT processor_id FROM Processors_Subjects_Links_Rel")
-
-        processors.each do |processor_id|
-            relProcOrSub.each do |subject_id|
-                if db.execute("SELECT processor_id FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", subject_id).include?(processor_id)
-                    filteredProcessors.append(processor_id)
-                end
+        case requestedType
+        when "processor_id"
+            relationalResult.each do |processor|
+                result.append(db.execute("SELECT name, id FROM Processors
+                    WHERE id = ?", processor["processor_id"])[0])
             end
-            
-            relLinkOrSub.each do |link_id|
-                if db.execute("SELECT processor_id FROM Processors_Subjects_Links_Rel WHERE link_id = ?", link_id).include?(processor_id)
-                    filteredProcessors.append(processor_id)
-                end
+            return result
+        when "subject_id"
+            relationalResult.each do |subject|
+                result.append(db.execute("SELECT name, id FROM Subjects
+                    WHERE id = ?", subject["subject_id"])[0])
+            end
+            return result
+        when "link_id"
+            relationalResult.each do |link|
+                result.append(db.execute("SELECT name, id, source FROM Links
+                    WHERE id = ?", link["link_id"])[0])
+            end
+            return result
+        end
+
+    end
+
+    def fetchInfo(source, type, id, column)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if column.class != String
+            raise "Error, wrong datatype"
+        end
+        if id.class != Integer
+          raise "Error, wrong datatype"
+        end
+        
+        db = SQLite3::Database.new(source)
+
+        return db.execute("SELECT #{column} FROM #{type} WHERE id = ?", id)
+    end
+
+    def fetchUserRelationalInfo(source, type, id)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if id.class != Integer
+          raise "Error, wrong datatype"
+        end
+        
+        db = SQLite3::Database.new(source)
+        case type
+        when "Processors"
+            return db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE processor_id = ?", id)
+        when "Subjects"
+            return db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE subject_id = ?", id)
+        when "Links"
+            return db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE link_id = ?", id)
+        end
+    end
+
+    def fetchText(type, id)
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if id.class != Integer
+          raise "Error, wrong datatype"
+        end
+
+        case type
+        when "Processors"
+            if (File.file?("text/processors/[[#{id}]].txt"))
+                return get_file_as_string("text/processors/[[#{id}]].txt")
+            end
+        when "Subjects"
+            if (File.file?("text/subjects/[[#{id}]].txt"))
+                return get_file_as_string("text/subjects/[[#{id}]].txt")
             end
         end
-        return filteredProcessors.uniq
-    when "Subjects"
-        filteredSubjects = []
-        subjects = db.execute("SELECT DISTINCT subject_id FROM Processors_Subjects_Links_Rel")
+    end
 
-        subjects.each do |subject_id|
-            relProcOrSub.each do |processor_id|
-                if db.execute("SELECT subject_id FROM Processors_Subjects_Links_Rel WHERE processor_id = ?", processor_id).include?(subject_id)
-                    filteredSubjects.append(subject_id)
-                end
+    def addRecord(source, type, name, content)
+        # Validation
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if name.class != String
+            raise "Error, wrong datatype"
+        end
+        if content.class != String
+          raise "Error, wrong datatype"
+        end
+        #----------
+
+        db = SQLite3::Database.new(source)
+
+        case type
+        when "Processors"
+            db.execute("INSERT INTO #{type} (name) VALUES (?)",name)
+
+            if content != nil
+                id = db.execute("SELECT id FROM #{type} ORDER BY id DESC LIMIT 1")
+                textfile = File.new("text/processors/#{id}.txt", "w+")
+                textfile.syswrite(content)
             end
-            
-            relLinkOrSub.each do |link_id|
-                if db.execute("SELECT subject_id FROM Processors_Subjects_Links_Rel WHERE link_id = ?", link_id).include?(subject_id)
-                    filteredSubjects.append(subject_id)
-                end
+        when "Subjects"
+            db.execute("INSERT INTO #{type} (name) VALUES (?)",name)
+
+            if content != nil
+                id = db.execute("SELECT id FROM #{type} ORDER BY id DESC LIMIT 1")
+                textfile = File.new("text/subjects/#{id}.txt", "w+")
+                textfile.syswrite(content)
+            end
+        when "Links"
+            db.execute("INSERT INTO #{type} (name,source) VALUES (?,?)",name,content)
+        end
+
+    end
+
+    def deleteRecord(source, type, id)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if id.class != Integer
+          raise "Error, wrong datatype"
+        end
+
+        db = SQLite3::Database.new(source)
+
+        db.execute("DELETE FROM #{type} WHERE id = ?", id)
+
+        # Relational table deletion
+        case type
+        when "Processors"
+            db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE processor_id = ?", id)
+            db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE processor_id = ?", id)
+        when "Subjects"
+            db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", id)
+            db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE subject_id = ?", id)
+        when "Links"
+            db.execute("DELETE FROM Processors_Subjects_Links_Rel WHERE link_id = ?", id)
+            db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE link_id = ?", id)
+        when "Users"
+            db.execute("DELETE FROM Users_Processors_Subjects_Links_Rel WHERE user_id = ?", id)
+        end
+    end
+
+    def updateRecord(source, type, id, name, content, relProcOrSub, relLinkOrSub)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if id.class != Integer
+            raise "Error, wrong datatype"
+        end
+        if name.class != String
+          raise "Error, wrong datatype"
+        end
+        if content.class != String
+            raise "Error, wrong datatype"
+          end
+        if relProcOrSub.class != String
+            raise "Error, wrong datatype"
+        end
+        if relLinkOrSub.class != String
+            raise "Error, wrong datatype"
+        end
+
+        db = SQLite3::Database.new(source)
+
+        case type
+        when "Processors"
+            db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
+
+            if content != nil
+                textfile = File.new("text/processors/[[#{id}]].txt", "w+")
+                textfile.syswrite(content)
+            end
+
+            db.execute("DELETE FROM Processors_Subjects_Links_Rel
+                WHERE processor_id = ?", id)
+
+            # For subjects
+            relProcOrSub.each do |relId|
+                # Add relations to subjects
+                db.execute("INSERT INTO Processors_Subjects_Links_Rel
+                (processor_id, subject_id) VALUES (?,?)", id, relId)
+            end
+            # For links
+            relLinkOrSub.each do |relId|
+                # Add relations to links
+                db.execute("INSERT INTO Processors_Subjects_Links_Rel
+                (processor_id, link_id) VALUES (?,?)", id, relId)
+            end
+
+        when "Subjects"
+            db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
+
+            if content != nil
+                textfile = File.new("text/subjects/[[#{id}]].txt", "w+")
+                textfile.syswrite(content)
+            end
+
+            db.execute("DELETE FROM Processors_Subjects_Links_Rel
+                WHERE subject_id = ?", id)
+
+            # For processors
+            relProcOrSub.each do |relId|
+                # Add relations to processors
+                db.execute("INSERT INTO Processors_Subjects_Links_Rel
+                (subject_id, processor_id) VALUES (?,?)", id, relId)
+            end
+            # For links
+            relLinkOrSub.each do |relId|
+                # Add relations to links
+                db.execute("INSERT INTO Processors_Subjects_Links_Rel
+                (subject_id, link_id) VALUES (?,?)", id, relId)
+            end
+        when "Links"
+            db.execute("UPDATE #{type} SET name = ? WHERE id = ?", name, id)
+            db.execute("UPDATE #{type} SET source = ? WHERE id = ?", content, id)
+
+            db.execute("DELETE FROM Processors_Subjects_Links_Rel
+                WHERE link_id = ?", id)
+
+            # For processors
+            relProcOrSub.each do |relId|
+                # Add relations to processors
+                db.execute("INSERT INTO Processors_Subjects_Links_Rel
+                (link_id, processor_id) VALUES (?,?)", id, relId)
+            end
+            # For subjects
+            relLinkOrSub.each do |relId|
+                # Add relations to subjects
+                db.execute("INSERT INTO Processors_Subjects_Links_Rel
+                (link_id, subject_id) VALUES (?,?)", id, relId)
             end
         end
 
-        return filteredSubjects.uniq
-    when "Links"
-        filteredLinks = []
-        links = db.execute("SELECT DISTINCT link_id FROM Processors_Subjects_Links_Rel")
+    end
 
-        links.each do |link_id|
-            relProcOrSub.each do |processor_id|
-                if db.execute("SELECT link_id FROM Processors_Subjects_Links_Rel WHERE processor_id = ?", processor_id).include?(link_id)
-                    filteredLinks.append(link_id)
+    def getFilteredItems(source, type, relProcOrSub, relLinkOrSub)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if relProcOrSub.class != Integer
+          raise "Error, wrong datatype"
+        end
+        if relLinkOrSub.class != Integer
+            raise "Error, wrong datatype"
+        end
+
+        db = SQLite3::Database.new(source)
+        case type
+        when "Processors"
+            filteredProcessors = []
+            processors = db.execute("SELECT DISTINCT processor_id FROM Processors_Subjects_Links_Rel")
+
+            processors.each do |processor_id|
+                relProcOrSub.each do |subject_id|
+                    if db.execute("SELECT processor_id FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", subject_id).include?(processor_id)
+                        filteredProcessors.append(processor_id)
+                    end
+                end
+                
+                relLinkOrSub.each do |link_id|
+                    if db.execute("SELECT processor_id FROM Processors_Subjects_Links_Rel WHERE link_id = ?", link_id).include?(processor_id)
+                        filteredProcessors.append(processor_id)
+                    end
                 end
             end
-            
-            relLinkOrSub.each do |subject_id|
-                if db.execute("SELECT link_id FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", subject_id).include?(link_id)
-                    filteredLinks.append(link_id)
+            return filteredProcessors.uniq
+        when "Subjects"
+            filteredSubjects = []
+            subjects = db.execute("SELECT DISTINCT subject_id FROM Processors_Subjects_Links_Rel")
+
+            subjects.each do |subject_id|
+                relProcOrSub.each do |processor_id|
+                    if db.execute("SELECT subject_id FROM Processors_Subjects_Links_Rel WHERE processor_id = ?", processor_id).include?(subject_id)
+                        filteredSubjects.append(subject_id)
+                    end
                 end
+                
+                relLinkOrSub.each do |link_id|
+                    if db.execute("SELECT subject_id FROM Processors_Subjects_Links_Rel WHERE link_id = ?", link_id).include?(subject_id)
+                        filteredSubjects.append(subject_id)
+                    end
+                end
+            end
+
+            return filteredSubjects.uniq
+        when "Links"
+            filteredLinks = []
+            links = db.execute("SELECT DISTINCT link_id FROM Processors_Subjects_Links_Rel")
+
+            links.each do |link_id|
+                relProcOrSub.each do |processor_id|
+                    if db.execute("SELECT link_id FROM Processors_Subjects_Links_Rel WHERE processor_id = ?", processor_id).include?(link_id)
+                        filteredLinks.append(link_id)
+                    end
+                end
+                
+                relLinkOrSub.each do |subject_id|
+                    if db.execute("SELECT link_id FROM Processors_Subjects_Links_Rel WHERE subject_id = ?", subject_id).include?(link_id)
+                        filteredLinks.append(link_id)
+                    end
+                end
+            end
+
+            return filteredLinks.uniq
+        end
+
+    end
+
+    #---------------------------------------------
+    # Accounts
+
+    def registerAccount(source, username, password)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        
+        db = SQLite3::Database.new(source)
+        # Validation
+        if username.class != String
+            raise "Error, wrong type for username"
+        end
+        if password.class != String
+            raise "Error, wrong type for password"
+        end
+
+        # Check if account already exists
+        result = db.execute("SELECT id FROM Users WHERE username=?", username)
+
+        # Create password hash with Bcrypt
+        if result.empty?
+            password_digest = BCrypt::Password.create(password)
+            db.execute("INSERT INTO Users
+                (username, password_digest, privilege) VALUES (?,?,'user')", username, password_digest)
+                return true
+        else
+            puts "Error, account already exists"
+            return false
+        end
+    end
+
+    def login(source, username, password)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+
+        db = SQLite3::Database.new(source)
+        # Validation
+        if username.class != String
+            raise "Error, wrong type for username"
+        end
+        if password.class != String
+            raise "Error, wrong type for password"
+        end
+
+        # Check if account exists
+        result = db.execute("SELECT id FROM Users WHERE username=?", username)
+
+        if !(result.empty?)
+            password_digest = (db.execute("SELECT password_digest FROM Users WHERE username=?", username))[0][0]
+            if BCrypt::Password.new(password_digest) == password
+                return true
+            else
+                return false
             end
         end
 
-        return filteredLinks.uniq
     end
 
-end
-
-#---------------------------------------------
-# Accounts
-
-def registerAccount(source, username, password)
-    db = SQLite3::Database.new(source)
-    # Validation
-    if username.class != String
-        raise "Error, wrong type for username"
-    end
-    if password.class != String
-        raise "Error, wrong type for password"
+    def fetchUserId(source, username)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if username.class != String
+            raise "Error, wrong datatype"
+        end
+        db = SQLite3::Database.new(source)
+        return db.execute("SELECT id FROM Users WHERE username=?", username)[0][0]
     end
 
-    # Check if account already exists
-    result = db.execute("SELECT id FROM Users WHERE username=?", username)
+    def fetchPrivilege(source, id)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if id.class != Integer
+            raise "Error, wrong datatype"
+        end
+        db = SQLite3::Database.new(source)
+        return db.execute("SELECT privilege FROM Users WHERE id=?", id)[0][0]
+    end
 
-    # Create password hash with Bcrypt
-    if result.empty?
-        password_digest = BCrypt::Password.create(password)
-        db.execute("INSERT INTO Users
-            (username, password_digest, privilege) VALUES (?,?,'user')", username, password_digest)
-            return true
-    else
-        puts "Error, account already exists"
+    def addUserRelation(source, type, user_id)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if user_id.class != Integer
+            raise "Error, wrong datatype"
+        end
+        db = SQLite3::Database.new(source)
+        # Validation
+
+        case type
+        when "Processors"
+            processor_id = db.execute("SELECT id FROM Processors ORDER BY id DESC LIMIT 1")[0][0]
+            db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,processor_id) VALUES (?,?)", user_id, processor_id)
+        when "Subjects"
+            subject_id = db.execute("SELECT id FROM Subjects ORDER BY id DESC LIMIT 1")[0][0]
+            db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,subject_id) VALUES (?,?)", user_id, subject_id)
+        when "Links"
+            link_id = db.execute("SELECT id FROM Links ORDER BY id DESC LIMIT 1")[0][0]
+            db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,link_id) VALUES (?,?)", user_id, link_id)
+        end
+    end
+
+    def checkUserAccess(source, type, user_id, related_id)
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if type.class != String
+            raise "Error, wrong datatype"
+        end
+        if user_id.class != Integer
+            raise "Error, wrong datatype"
+        end
+        if related_id.class != Integer
+            raise "Error, wrong datatype"
+        end
+
+        db = SQLite3::Database.new(source)
+        # Validation
+
+        case type
+        when "Processors"
+            test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE processor_id=?", related_id)[0][0]
+            if user_id == test_user_id
+                return true
+            else
+                return false
+            end
+        when "Subjects"
+            test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE subject_id=?", related_id)[0][0]
+            if user_id == test_user_id
+                return true
+            else
+                return false
+            end
+        when "Links"
+            test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE link_id=?", related_id)[0][0]
+            if user_id == test_user_id
+                return true
+            else
+                return false
+            end
+        end
+
         return false
     end
-end
 
-def login(source, username, password)
-    db = SQLite3::Database.new(source)
-    # Validation
-    if username.class != String
-        raise "Error, wrong type for username"
-    end
-    if password.class != String
-        raise "Error, wrong type for password"
-    end
-
-    # Check if account exists
-    result = db.execute("SELECT id FROM Users WHERE username=?", username)
-
-    if !(result.empty?)
-        password_digest = (db.execute("SELECT password_digest FROM Users WHERE username=?", username))[0][0]
-        if BCrypt::Password.new(password_digest) == password
-            return true
-        else
-            return false
-        end
-    end
-
-end
-
-def fetchUserId(source, username)
-    db = SQLite3::Database.new(source)
-    return db.execute("SELECT id FROM Users WHERE username=?", username)[0][0]
-end
-
-def fetchPrivilege(source, id)
-    db = SQLite3::Database.new(source)
-    return db.execute("SELECT privilege FROM Users WHERE id=?", id)[0][0]
-end
-
-def addUserRelation(source, type, user_id)
-    db = SQLite3::Database.new(source)
-    # Validation
-
-    case type
-    when "Processors"
-        processor_id = db.execute("SELECT id FROM Processors ORDER BY id DESC LIMIT 1")[0][0]
-        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,processor_id) VALUES (?,?)", user_id, processor_id)
-    when "Subjects"
-        subject_id = db.execute("SELECT id FROM Subjects ORDER BY id DESC LIMIT 1")[0][0]
-        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,subject_id) VALUES (?,?)", user_id, subject_id)
-    when "Links"
-        link_id = db.execute("SELECT id FROM Links ORDER BY id DESC LIMIT 1")[0][0]
-        db.execute("INSERT INTO Users_Processors_Subjects_Links_Rel (user_id,link_id) VALUES (?,?)", user_id, link_id)
-    end
-end
-
-def checkUserAccess(source, type, user_id, related_id)
-    db = SQLite3::Database.new(source)
-    # Validation
-
-    case type
-    when "Processors"
-        test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE processor_id=?", related_id)[0][0]
-        if user_id == test_user_id
-            return true
-        else
-            return false
-        end
-    when "Subjects"
-        test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE subject_id=?", related_id)[0][0]
-        if user_id == test_user_id
-            return true
-        else
-            return false
-        end
-    when "Links"
-        test_user_id = db.execute("SELECT user_id FROM Users_Processors_Subjects_Links_Rel WHERE link_id=?", related_id)[0][0]
-        if user_id == test_user_id
-            return true
-        else
-            return false
-        end
-    end
-
-    return false
 end
