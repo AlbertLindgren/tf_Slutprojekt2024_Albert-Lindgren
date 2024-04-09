@@ -89,9 +89,7 @@ module Model
         if requestedType.class != String
             raise "Error, wrong datatype"
         end
-        if id.class != Integer
-          raise "Error, wrong datatype"
-        end
+
         db = SQLite3::Database.new(source)
         db.results_as_hash = true
 
@@ -151,9 +149,6 @@ module Model
         if column.class != String
             raise "Error, wrong datatype"
         end
-        if id.class != Integer
-          raise "Error, wrong datatype"
-        end
         
         db = SQLite3::Database.new(source)
 
@@ -173,9 +168,6 @@ module Model
         end
         if type.class != String
             raise "Error, wrong datatype"
-        end
-        if id.class != Integer
-          raise "Error, wrong datatype"
         end
         
         db = SQLite3::Database.new(source)
@@ -198,9 +190,6 @@ module Model
     def fetchText(type, id)
         if type.class != String
             raise "Error, wrong datatype"
-        end
-        if id.class != Integer
-          raise "Error, wrong datatype"
         end
 
         case type
@@ -280,9 +269,6 @@ module Model
         if type.class != String
             raise "Error, wrong datatype"
         end
-        if id.class != Integer
-          raise "Error, wrong datatype"
-        end
 
         db = SQLite3::Database.new(source)
 
@@ -324,15 +310,12 @@ module Model
         if type.class != String
             raise "Error, wrong datatype"
         end
-        if id.class != Integer
-            raise "Error, wrong datatype"
-        end
         if name.class != String
           raise "Error, wrong datatype"
         end
         if content.class != String
             raise "Error, wrong datatype"
-          end
+        end
         if relProcOrSub.class != String
             raise "Error, wrong datatype"
         end
@@ -426,12 +409,6 @@ module Model
             raise "Error, wrong datatype"
         end
         if type.class != String
-            raise "Error, wrong datatype"
-        end
-        if relProcOrSub.class != Integer
-          raise "Error, wrong datatype"
-        end
-        if relLinkOrSub.class != Integer
             raise "Error, wrong datatype"
         end
 
@@ -599,9 +576,7 @@ module Model
         if source.class != String
             raise "Error, wrong datatype"
         end
-        if id.class != Integer
-            raise "Error, wrong datatype"
-        end
+ 
         db = SQLite3::Database.new(source)
         return db.execute("SELECT privilege FROM Users WHERE id=?", id)[0][0]
     end
@@ -620,9 +595,7 @@ module Model
         if type.class != String
             raise "Error, wrong datatype"
         end
-        if user_id.class != Integer
-            raise "Error, wrong datatype"
-        end
+ 
         db = SQLite3::Database.new(source)
         # Validation
 
@@ -655,12 +628,6 @@ module Model
         if type.class != String
             raise "Error, wrong datatype"
         end
-        if user_id.class != Integer
-            raise "Error, wrong datatype"
-        end
-        if related_id.class != Integer
-            raise "Error, wrong datatype"
-        end
 
         db = SQLite3::Database.new(source)
  
@@ -691,4 +658,42 @@ module Model
         return false
     end
 
+    # Updates account details
+    #
+    # @param [String] source Path to database
+    # @param [Integer] user_id ID of relevant user
+    # @param [String] username New username
+    # @param [String] password New password
+    #
+    # @return [true,false] True if the change was succesful, otherwise false
+    def updateAccount(source, user_id, username, password)
+        # Validation
+        if source.class != String
+            raise "Error, wrong datatype"
+        end
+        if username.class != String
+            raise "Error, wrong datatype"
+        end
+        if username.class != String
+            raise "Error, wrong type for username"
+        end
+        if password.class != String
+            raise "Error, wrong type for password"
+        end
+
+        db = SQLite3::Database.new(source)
+        
+        # Check if account already exists
+        result = db.execute("SELECT id FROM Users WHERE username=? AND NOT id = ?", username, user_id)
+
+        # Create password hash with Bcrypt
+        if result.empty?
+            password_digest = BCrypt::Password.create(password)
+            db.execute("UPDATE Users SET username = ?, password_digest = ? WHERE id = ?", username, password_digest, user_id)
+            return true
+        else
+            puts "Error, account name is taken"
+            return false
+        end
+    end
 end

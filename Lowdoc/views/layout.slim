@@ -41,6 +41,10 @@ html lang="en"
             p.notice = flash[:too_many_login_attempts]
         - if flash[:try_again_later]
             p.notice = flash[:try_again_later]
+        - if flash[:empty_fields]
+            p.notice = flash[:empty_fields]
+        - if flash[:succesful_change]
+            p.notice = flash[:succesful_change]
         ==yield
         
  

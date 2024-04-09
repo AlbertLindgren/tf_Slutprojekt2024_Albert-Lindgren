@@ -629,7 +629,6 @@ post('/accounts/new') do
         session[:logged_in] = true
         flash[:registered] = "Registered and logged in"
     else
-        # Do something with sessions here, and maybe sinatra-flash
         flash[:failed_registration] = "Username already taken"
         redirect('/accounts/register')
     end
@@ -739,6 +738,42 @@ post('/protected/users/:id/delete') do
     id = params[:id]
     
     deleteRecord('db/lowdoc.db', "Users", id)
+
+    redirect('/protected/users/index')
+end
+
+# Edit user
+#
+# @param [Integer] id, ID of clicked user
+get('/protected/users/:id/edit') do
+    @id = params[:id]
+
+    slim(:"/protected/users/edit")
+end
+
+# Update account details of user
+#
+# @param [Integer] id, ID of clicked user
+# @param [String] username, New username, inputted by user
+# @param [String] password, New password, inputted by user
+post('/protected/users/:id/update') do
+    id = params[:id]
+    username = params[:username]
+    password = params[:password]
+
+    if username == nil || password == nil
+        flash[:empty_fields] = "You left some fields empty!"
+        redirect('/protected/users/#{id}/edit')
+    else
+       if updateAccount('db/lowdoc.db', id, username, password)
+            flash[:succesful_change] = "Succesfully updated account, sign in again"
+            session.clear
+            session[:logged_in] = false
+       else
+            flash[:failed_registration]
+            redirect('/protected/users/#{id}/edit')
+       end
+    end
 
     redirect('/protected/users/index')
 end
