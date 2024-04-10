@@ -39,7 +39,7 @@ form method="post" action="subjects/filter"
 - subjects.each do |subject|
     - if session[:filteredSubjects] == nil
         br
-        a.bigLink href="/subjects/#{subject["id"]}/show" #{subject["name"]}
+        a href="/subjects/#{subject["id"]}/show" #{subject["name"]}
         form method="get" action="/subjects/#{subject["id"]}/edit"
             br
             input type="submit" value="Edit"/
@@ -47,7 +47,7 @@ form method="post" action="subjects/filter"
             input type="submit" value="Delete"/
     - elsif session[:filteredSubjects].include?(subject["id"])
         br
-        a.bigLink href="/subjects/#{subject["id"]}/show" #{subject["name"]}
+        a href="/subjects/#{subject["id"]}/show" #{subject["name"]}
         form method="get" action="/subjects/#{subject["id"]}/edit"
             br
             input type="submit" value="Edit"/

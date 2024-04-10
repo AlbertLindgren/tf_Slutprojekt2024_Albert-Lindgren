@@ -9,9 +9,9 @@ html lang="en"
     body
         - if session[:logged_in]
             p.boldtext = "Welcome #{session[:username]}"
-
+        p.title Lowdoc
         a> href="/" Home
-        a> href="/" About
+        a> href="/about" About
         - if session[:logged_in]
             form action="/accounts/logout" method="post"
                 br

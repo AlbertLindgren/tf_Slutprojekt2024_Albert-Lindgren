@@ -5,6 +5,17 @@ form action="/protected/users/#{@id}/update" method="post"
   input# type="password" name="password" placeholder="Password"
   input type="submit" value="Submit change"/
 
+
+h2 Change who has access to your articles: 
+form method="post" action="/protected/users/update"
+    p = "Select processors:"
+    - @processors.each do |processor|
+        - if @yourProcessors.include?(processor["id"])
+            p = processor["name"]
+            br
+    input type="submit" value="Edit" class=""/
+
+
 h2 Delete your account
 form method="post" action="/protected/users/#{@id}/delete"
             input type="submit" value="Delete account"/

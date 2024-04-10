@@ -40,7 +40,7 @@ form method="post" action="processors/filter"
 - processors.each do |processor|
     - if session[:filteredProcessors] == nil
         br
-        a.bigLink href="/processors/#{processor["id"]}/show" #{processor["name"]}
+        a href="/processors/#{processor["id"]}/show" #{processor["name"]}
         form method="get" action="/processors/#{processor["id"]}/edit"
             br
             input type="submit" value="Edit"/
@@ -48,7 +48,7 @@ form method="post" action="processors/filter"
             input type="submit" value="Delete"/
     - elsif session[:filteredProcessors].include?(processor["id"])
         br
-        a.bigLink href="/processors/#{processor["id"]}/show" #{processor["name"]}
+        a href="/processors/#{processor["id"]}/show" #{processor["name"]}
         form method="get" action="/processors/#{processor["id"]}/edit"
             br
             input type="submit" value="Edit"/

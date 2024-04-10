@@ -3,7 +3,7 @@ require 'slim'
 require 'sqlite3'
 require 'sinatra/flash'
 
-require_relative "model.rb"
+require_relative 'model.rb'
 
 enable :sessions
 
@@ -21,87 +21,87 @@ end
 
 before('/processors/new') do 
     if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        flash[:not_logged_in] = 'You need to be logged in to perform this action'
         redirect('/processors')
     end
 end
 before('/processors/:id/edit') do 
     id = params[:id]
     if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        flash[:not_logged_in] = 'You need to be logged in to perform this action'
         redirect('/processors')
     end
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Processors', session[:user_id], id))
-        flash[:unauthorized] = "You are not authorized to perform this action"
+    if session[:user_privilege] != 'admin' && session[:user_privilege] != 'owner' && !(checkUserAccess('db/lowdoc.db', 'Processors', session[:user_id], id))
+        flash[:unauthorized] = 'You are not authorized to perform this action'
         redirect('/processors')
     end
 end
 before('/processors/:id/delete') do 
     id = params[:id]
     if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        flash[:not_logged_in] = 'You need to be logged in to perform this action'
         redirect('/processors')
     end
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Processors', session[:user_id], id))
-        flash[:unauthorized] = "You are not authorized to perform this action"
+    if session[:user_privilege] != 'admin' && session[:user_privilege] != 'owner' && !(checkUserAccess('db/lowdoc.db', 'Processors', session[:user_id], id))
+        flash[:unauthorized] = 'You are not authorized to perform this action'
         redirect('/processors')
     end
 end
 
 before('/subjects/new') do 
     if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        flash[:not_logged_in] = 'You need to be logged in to perform this action'
         redirect('/subjects')
     end
 end
 before('/subjects/:id/edit') do 
     id = params[:id]
     if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        flash[:not_logged_in] = 'You need to be logged in to perform this action'
         redirect('/subjects')
     end
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Subjects', session[:user_id], id))
-        flash[:unauthorized] = "You are not authorized to perform this action"
+    if session[:user_privilege] != 'admin' && session[:user_privilege] != 'owner' && !(checkUserAccess('db/lowdoc.db', 'Subjects', session[:user_id], id))
+        flash[:unauthorized] = 'You are not authorized to perform this action'
         redirect('/subjects')
     end
 end
 before('/subjects/:id/delete') do 
     id = params[:id]
     if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        flash[:not_logged_in] = 'You need to be logged in to perform this action'
         redirect('/subjects')
     end
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Subjects', session[:user_id], id))
-        flash[:unauthorized] = "You are not authorized to perform this action"
+    if session[:user_privilege] != 'admin' && session[:user_privilege] != 'owner' && !(checkUserAccess('db/lowdoc.db', 'Subjects', session[:user_id], id))
+        flash[:unauthorized] = 'You are not authorized to perform this action'
         redirect('/subjects')
     end
 end
 
 before('/links/new') do 
     if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        flash[:not_logged_in] = 'You need to be logged in to perform this action'
         redirect('/links')
     end
 end
 before('/links/:id/edit') do 
     id = params[:id]
     if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        flash[:not_logged_in] = 'You need to be logged in to perform this action'
         redirect('/links')
     end
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Links', session[:user_id], id))
-        flash[:unauthorized] = "You are not authorized to perform this action"
+    if session[:user_privilege] != 'admin' && session[:user_privilege] != 'owner' && !(checkUserAccess('db/lowdoc.db', 'Links', session[:user_id], id))
+        flash[:unauthorized] = 'You are not authorized to perform this action'
         redirect('/links')
     end
 end
 before('/links/:id/delete') do 
     id = params[:id]
     if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
+        flash[:not_logged_in] = 'You need to be logged in to perform this action'
         redirect('/links')
     end
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess('db/lowdoc.db', 'Links', session[:user_id], id))
-        flash[:unauthorized] = "You are not authorized to perform this action"
+    if session[:user_privilege] != 'admin' && session[:user_privilege] != 'owner' && !(checkUserAccess('db/lowdoc.db', 'Links', session[:user_id], id))
+        flash[:unauthorized] = 'You are not authorized to perform this action'
         redirect('/links')
     end
 end
@@ -114,10 +114,19 @@ before('/protected/*') do
 end
 
 before('/protected/users/index') do
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner"
+    if session[:user_privilege] != 'admin' && session[:user_privilege] != 'owner'
         flash[:unauthorized]
         redirect('/')
     end
+end
+
+# About page
+
+# Displays the about page
+#
+get('/about') do
+
+    slim(:about)
 end
 
 # Processors
@@ -130,7 +139,7 @@ get('/processors') do
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
     @links = getDBItems('db/lowdoc.db', 'Links')
 
-    slim(:"processors/index", locals:{processors:result})
+    slim(:'processors/index', locals:{processors:result})
 end
 
 # Shows specific processors with related information
@@ -146,13 +155,13 @@ get('/processors/:id/show') do
     author_id = fetchUserRelationalInfo('db/lowdoc.db', 'Processors', @id)
     @author = fetchInfo('db/lowdoc.db', 'users', author_id, 'username')
 
-    slim(:"processors/show")
+    slim(:'processors/show')
 end
 
 # Displays a page for adding new processors
 #
 get('/processors/new') do
-    slim(:"processors/new")
+    slim(:'processors/new')
 end
 
 # Displays the edit options for the clicked processor
@@ -172,17 +181,17 @@ get('/processors/:id/edit') do
     # Id lists for checkbox
     @relSubjectsIdList = []
     @relSubjects.each do |subject|
-        @relSubjectsIdList.append(subject["id"])
+        @relSubjectsIdList.append(subject['id'])
     end
     @relLinksIdList = []
     @relLinks.each do |link|
-        @relLinksIdList.append(link["id"])
+        @relLinksIdList.append(link['id'])
     end
 
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
     @links = getDBItems('db/lowdoc.db', 'Links')
 
-    slim(:"processors/edit")
+    slim(:'processors/edit')
 end
 
 # Updates a processor
@@ -205,13 +214,13 @@ post('/processors/:id/update') do
     params.each_key {|key|
         if key.class == String
             @subjects.each do |subject|
-                if subject["name"] == key
-                    relSubjects.append(subject["id"])
+                if subject['name'] == key
+                    relSubjects.append(subject['id'])
                 end
             end
             @links.each do |link|
-                if link["name"] == key
-                    relLinks.append(link["id"])
+                if link['name'] == key
+                    relLinks.append(link['id'])
                 end
             end
         end
@@ -256,13 +265,13 @@ post('/processors/filter') do
     params.each_key {|key|
         if key.class == String
             @subjects.each do |subject|
-                if subject["name"] == key
-                    chosenSubjects.append(subject["id"])
+                if subject['name'] == key
+                    chosenSubjects.append(subject['id'])
                 end
             end
             @links.each do |link|
-                if link["name"] == key
-                    chosenLinks.append(link["id"])
+                if link['name'] == key
+                    chosenLinks.append(link['id'])
                 end
             end
         end
@@ -298,7 +307,7 @@ get('/subjects') do
     @processors = getDBItems('db/lowdoc.db', 'Processors')
     @links = getDBItems('db/lowdoc.db', 'Links')
 
-    slim(:"subjects/index", locals:{subjects:result})
+    slim(:'subjects/index', locals:{subjects:result})
 end
 
 # Shows specific subjects with related information
@@ -309,13 +318,13 @@ get('/subjects/:id/show') do
     @name = fetchInfo('db/lowdoc.db', 'Subjects', @id, 'name')
     # Fetch description text
     @content = fetchText('Subjects', @id)
-    slim(:"subjects/show")
+    slim(:'subjects/show')
 end
 
 # Displays a page for adding new subject
 #
 get('/subjects/new') do
-    slim(:"subjects/new")
+    slim(:'subjects/new')
 end
 
 # Displays the edit options for the clicked subject
@@ -334,17 +343,17 @@ get('/subjects/:id/edit') do
     # Id lists for checkbox
     @relProcessorsIdList = []
     @relProcessors.each do |processor|
-        @relProcessorsIdList.append(processor["id"])
+        @relProcessorsIdList.append(processor['id'])
     end
     @relLinksIdList = []
     @relLinks.each do |link|
-        @relLinksIdList.append(link["id"])
+        @relLinksIdList.append(link['id'])
     end
 
     @processors = getDBItems('db/lowdoc.db', 'Processors')
     @links = getDBItems('db/lowdoc.db', 'Links')
 
-    slim(:"subjects/edit")
+    slim(:'subjects/edit')
 end
 
 # Updates a subject
@@ -367,13 +376,13 @@ post('/subjects/:id/update') do
     params.each_key {|key|
         if key.class == String
             @processors.each do |processor|
-                if processor["name"] == key
-                    relProcessors.append(processor["id"])
+                if processor['name'] == key
+                    relProcessors.append(processor['id'])
                 end
             end
             @links.each do |link|
-                if link["name"] == key
-                    relLinks.append(link["id"])
+                if link['name'] == key
+                    relLinks.append(link['id'])
                 end
             end
         end
@@ -418,13 +427,13 @@ post('/subjects/filter') do
     params.each_key {|key|
         if key.class == String
             @processors.each do |processor|
-                if processor["name"] == key
-                    chosenProcessors.append(processor["id"])
+                if processor['name'] == key
+                    chosenProcessors.append(processor['id'])
                 end
             end
             @links.each do |link|
-                if link["name"] == key
-                    chosenLinks.append(link["id"])
+                if link['name'] == key
+                    chosenLinks.append(link['id'])
                 end
             end
         end
@@ -460,13 +469,13 @@ get('/links') do
     @processors = getDBItems('db/lowdoc.db', 'Processors')
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
 
-    slim(:"links/index", locals:{links:result})
+    slim(:'links/index', locals:{links:result})
 end
 
 # Displays a page for adding new links
 #
 get('/links/new') do
-    slim(:"links/new")
+    slim(:'links/new')
 end
 
 # Displays the edit options for the clicked link
@@ -483,17 +492,17 @@ get('/links/:id/edit') do
     # Id lists for checkbox
     @relProcessorsIdList = []
     @relProcessors.each do |processor|
-        @relProcessorsIdList.append(processor["id"])
+        @relProcessorsIdList.append(processor['id'])
     end
     @relSubjectsIdList = []
     @relSubjects.each do |subject|
-        @relSubjectsIdList.append(subject["id"])
+        @relSubjectsIdList.append(subject['id'])
     end
 
     @processors = getDBItems('db/lowdoc.db', 'Processors')
     @subjects = getDBItems('db/lowdoc.db', 'Subjects')
 
-    slim(:"links/edit")
+    slim(:'links/edit')
 end
 
 # Updates a link
@@ -516,13 +525,13 @@ post('/links/:id/update') do
     params.each_key {|key|
         if key.class == String
             @processors.each do |processor|
-                if processor["name"] == key
-                    relProcessors.append(processor["id"])
+                if processor['name'] == key
+                    relProcessors.append(processor['id'])
                 end
             end
             @subjects.each do |subject|
-                if subject["name"] == key
-                    relSubjects.append(subject["id"])
+                if subject['name'] == key
+                    relSubjects.append(subject['id'])
                 end
             end
         end
@@ -567,13 +576,13 @@ post('/links/filter') do
     params.each_key {|key|
         if key.class == String
             @processors.each do |processor|
-                if processor["name"] == key
-                    chosenProcessors.append(processor["id"])
+                if processor['name'] == key
+                    chosenProcessors.append(processor['id'])
                 end
             end
             @subjects.each do |subject|
-                if subject["name"] == key
-                    chosenSubjects.append(subject["id"])
+                if subject['name'] == key
+                    chosenSubjects.append(subject['id'])
                 end
             end
         end
@@ -610,7 +619,7 @@ end
 get('/accounts/register') do
 
 
-    slim(:"/accounts/register")
+    slim(:'/accounts/register')
 end
 
 # Displays the page for logging in
@@ -618,7 +627,7 @@ end
 get('/accounts/login') do
     
 
-    slim(:"/accounts/login")
+    slim(:'/accounts/login')
 end
 
 # Registers an account
@@ -632,7 +641,7 @@ post('/accounts/new') do
     password_confirm = params[:password_confirm]
 
     if password != password_confirm
-        flash[:unconfirmed_password] = "The passwords do not match."
+        flash[:unconfirmed_password] = 'The passwords do not match.'
         redirect('/accounts/register')
     end
 
@@ -641,9 +650,9 @@ post('/accounts/new') do
         session[:user_privilege] = fetchPrivilege('db/lowdoc.db', session[:user_id])
         session[:username] = username
         session[:logged_in] = true
-        flash[:registered] = "Registered and logged in"
+        flash[:registered] = 'Registered and logged in'
     else
-        flash[:failed_registration] = "Username already taken"
+        flash[:failed_registration] = 'Username already taken'
         redirect('/accounts/register')
     end
 
@@ -690,7 +699,7 @@ post('/accounts/login') do
     elsif (Time.now - users[index].time) <= 180 && users[index].attempts >= 10 && !cooldown
         cooldownTime = Time.now
         cooldown = true
-        flash[:too_many_login_attempts] = "Exceeded attempt limit, try again in 10 minutes"
+        flash[:too_many_login_attempts] = 'Exceeded attempt limit, try again in 10 minutes'
         redirect('/accounts/login')
     end
 
@@ -702,12 +711,12 @@ post('/accounts/login') do
        session[:user_privilege] = fetchPrivilege('db/lowdoc.db', session[:user_id])
        session[:username] = username
        session[:logged_in] = true
-       flash[:login] = "Logged in"
+       flash[:login] = 'Logged in'
     elsif cooldownTime != nil && (Time.now - cooldownTime) <= 600
-        flash[:try_again_later] = "Try again later"
+        flash[:try_again_later] = 'Try again later'
         redirect('/accounts/login')
     else
-        flash[:failed_login] = "Wrong information"
+        flash[:failed_login] = 'Wrong information'
         redirect('/accounts/login')
     end
 
@@ -719,7 +728,7 @@ end
 post('/accounts/logout') do
     session.clear
     session[:logged_in] = false
-    flash[:logout] = "Logged out"
+    flash[:logout] = 'Logged out'
     redirect('/')
 end
 
@@ -728,11 +737,11 @@ end
 # Displays accounts
 #
 get('/protected/users/index') do
-    @owner = getColumn('db/lowdoc.db', "Users", "privilege", "owner")[0]
-    @admins = getColumn('db/lowdoc.db', "Users", "privilege", "admin")
-    @users = getColumn('db/lowdoc.db', "Users", "privilege", "user")
+    @owner = getColumn('db/lowdoc.db', 'Users', 'privilege', 'owner')[0]
+    @admins = getColumn('db/lowdoc.db', 'Users', 'privilege', 'admin')
+    @users = getColumn('db/lowdoc.db', 'Users', 'privilege', 'user')
 
-    slim(:"/protected/users/index")
+    slim(:'/protected/users/index')
 end
 
 # Displays specific user
@@ -740,9 +749,9 @@ end
 # @param [Integer] id, ID of clicked user
 get('/protected/users/:id/show') do
     @id = params[:id]
-    @name = fetchInfo('db/lowdoc.db', "Users", @id, "username")[0]
+    @name = fetchInfo('db/lowdoc.db', 'Users', @id, 'username')[0]
 
-    slim(:"/protected/users/show")
+    slim(:'/protected/users/show')
 end
 
 # Delete user
@@ -751,7 +760,7 @@ end
 post('/protected/users/:id/delete') do
     id = params[:id]
     
-    deleteRecord('db/lowdoc.db', "Users", id)
+    deleteRecord('db/lowdoc.db', 'Users', id)
 
     redirect('/protected/users/index')
 end
@@ -762,7 +771,12 @@ end
 get('/protected/users/:id/edit') do
     @id = params[:id]
 
-    slim(:"/protected/users/edit")
+    # Records related to the user
+    @yourProcessors = fetchUserRelatedRecords('db/lowdoc.db', 'Processors', @id)
+    @yourSubjects = fetchUserRelatedRecords('db/lowdoc.db', 'Subjects', @id)
+    @yourLinks = fetchUserRelatedRecords('db/lowdoc.db', 'Links', @id)
+
+    slim(:'/protected/users/edit')
 end
 
 # Update account details of user
@@ -776,11 +790,11 @@ post('/protected/users/:id/update') do
     password = params[:password]
 
     if username == nil || password == nil
-        flash[:empty_fields] = "You left some fields empty!"
+        flash[:empty_fields] = 'You left some fields empty!'
         redirect('/protected/users/#{id}/edit')
     else
        if updateAccount('db/lowdoc.db', id, username, password)
-            flash[:succesful_change] = "Succesfully updated account, sign in again"
+            flash[:succesful_change] = 'Succesfully updated account, sign in again'
             session.clear
             session[:logged_in] = false
        else

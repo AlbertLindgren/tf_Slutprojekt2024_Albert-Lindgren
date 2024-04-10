@@ -17,7 +17,7 @@ br
 h3 Regular users
 - @users.each do |user|
     br
-    a.bigLink href="/protected/users/#{user["id"]}/show" #{user["username"]}
+    a href="/protected/users/#{user["id"]}/show" #{user["username"]}
     - if session[:user_id] == user["id"] || session[:user_privilege] == "owner"
           form method="get" action="/protected/users/#{user["id"]}/edit"
             input type="submit" value="Edit"/

@@ -43,6 +43,7 @@ a.bigLink {
     bottom: 50px;
     position:fixed;
     bottom: 50px;
+    left: 540px;
     font-size:2rem;
     font-family: Verdana, Arial, Helvetica, sans-serif;
 }   
@@ -51,4 +52,10 @@ a.bigLink {
     font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
     font-size: 1.5rem;
     font-style: italic;
+}
+
+.title {
+    font-style: italic;
+    font-size: 1.5rem;
+    color: #DDB87E;
 }
