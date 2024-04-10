@@ -1,4 +1,4 @@
-h2 Edit your account
+h2 Edit your account, #{session[:username]}
 
 form action="/protected/users/#{@id}/update" method="post"
   input# type="text" name="username" placeholder="Username"

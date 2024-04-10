@@ -106,6 +106,20 @@ before('/links/:id/delete') do
     end
 end
 
+before('/protected/*') do
+    if session[:logged_in] == false
+        flash[:unauthorized]
+        redirect('/')
+    end
+end
+
+before('/protected/users/index') do
+    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner"
+        flash[:unauthorized]
+        redirect('/')
+    end
+end
+
 # Processors
 
 # Displays processors
