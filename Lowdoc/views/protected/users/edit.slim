@@ -1,20 +1,11 @@
 h2 Edit your account, #{session[:username]}
 
 form action="/protected/users/#{@id}/update" method="post"
-  input# type="text" name="username" placeholder="Username"
+  input# type="text" name="username" value="#{session[:username]}"
   input# type="password" name="password" placeholder="Password"
-  input type="submit" value="Submit change"/
-
-
-h2 Change who has access to your articles: 
-form method="post" action="/protected/users/update"
-    p = "Select processors:"
-    - @processors.each do |processor|
-        - if @yourProcessors.include?(processor["id"])
-            p = processor["name"]
-            br
-    input type="submit" value="Edit" class=""/
-
+  br
+  br
+  input type="submit" value="Submit change" class=""/
 
 h2 Delete your account
 form method="post" action="/protected/users/#{@id}/delete"

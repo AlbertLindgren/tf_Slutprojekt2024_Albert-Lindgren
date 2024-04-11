@@ -5,11 +5,12 @@ br
 h3 Admins
 - @admins.each do |admin|
     br
-    a.bigLink href="/protected/users/#{admin["id"]}/show" #{admin["username"]}
+    a href="/protected/users/#{admin["id"]}/show" #{admin["username"]}
     - if session[:user_id] == admin["id"] || session[:user_privilege] == "owner"
         form method="get" action="/protected/users/#{admin["id"]}/edit"
-          input type="submit" value="Edit"/
-          br
+            br
+            input type="submit" value="Edit"/
+            br
     - if session["user_privilege"] == "owner"
         form method="post" action="/protected/users/#{admin["id"]}/delete"
             input type="submit" value="Delete"/
@@ -20,8 +21,9 @@ h3 Regular users
     a href="/protected/users/#{user["id"]}/show" #{user["username"]}
     - if session[:user_id] == user["id"] || session[:user_privilege] == "owner"
           form method="get" action="/protected/users/#{user["id"]}/edit"
+            br
             input type="submit" value="Edit"/
             br
-    - if session["user_privilege"] == "owner"
+    - if session["user_privilege"] == "owner" || session["user_privilege"] == "admin"
         form method="post" action="/protected/users/#{user["id"]}/delete"
             input type="submit" value="Delete"/

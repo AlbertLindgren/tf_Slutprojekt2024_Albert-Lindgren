@@ -52,4 +52,6 @@ html lang="en"
 
     footer
     - if session[:logged_in]
+        br
+        br
         a> href="/protected/users/#{session[:user_id]}/edit" Edit your account
