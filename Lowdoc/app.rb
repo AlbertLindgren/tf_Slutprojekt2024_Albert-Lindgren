@@ -170,10 +170,13 @@ end
 get("/processors/:id/edit") do
     @id = params[:id]
     @name = fetchInfo("db/lowdoc.db", "Processors", @id, "name")
-    #@content = fetchInfo("db/lowdoc.db", "Processors", @id, "content")
 
     # Fetch description text
     @content = fetchText("Processors", @id)
+
+    # Fetch name of author
+    author_id = fetchUserRelationalInfo("db/lowdoc.db", "Processors", @id)
+    @author = fetchInfo("db/lowdoc.db", "users", author_id, "username")
 
     # Get relational info
     @relSubjects = getDBItemsWithRelId("db/lowdoc.db", "Processors", "subject_id", @id)
@@ -318,6 +321,11 @@ get("/subjects/:id/show") do
     @name = fetchInfo("db/lowdoc.db", "Subjects", @id, "name")
     # Fetch description text
     @content = fetchText("Subjects", @id)
+
+    # Fetch name of author
+    author_id = fetchUserRelationalInfo("db/lowdoc.db", "Subjects", @id)
+    @author = fetchInfo("db/lowdoc.db", "users", author_id, "username")
+
     slim(:"subjects/show")
 end
 
@@ -336,6 +344,10 @@ get("/subjects/:id/edit") do
 
     # Fetch description text
     @content = fetchText("Subjects", @id)
+
+    # Fetch name of author
+    author_id = fetchUserRelationalInfo("db/lowdoc.db", "Subjects", @id)
+    @author = fetchInfo("db/lowdoc.db", "users", author_id, "username")
 
     # Get relational info
     @relProcessors = getDBItemsWithRelId("db/lowdoc.db", "Subjects", "processor_id", @id)
@@ -485,6 +497,10 @@ get("/links/:id/edit") do
     @id = params[:id]
     @name = fetchInfo("db/lowdoc.db", "Links", @id, "name")
     @source = fetchInfo("db/lowdoc.db", "Links", @id, "source")
+
+    # Fetch name of author
+    author_id = fetchUserRelationalInfo("db/lowdoc.db", "Links", @id)
+    @author = fetchInfo("db/lowdoc.db", "users", author_id, "username")
 
     # Get relational info
     @relProcessors = getDBItemsWithRelId("db/lowdoc.db", "Links", "processor_id", @id)
