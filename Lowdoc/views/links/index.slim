@@ -40,16 +40,16 @@ form method="post" action="links/filter"
 - links.each do |link|
     - if session[:filteredLinks] == nil
         a href="#{link["source"]}" #{link["name"]}
-        form method="get" action="/links/#{link["id"]}/edit"
+        form method="get" action="/links/protected/#{link["id"]}/edit"
             br
             input type="submit" value="Edit"/
-        form method="post" action="links/#{link["id"]}/delete"
+        form method="post" action="links/protected/#{link["id"]}/delete"
             input type="submit" value="Delete"/
     - elsif session[:filteredLinks].include?(link["id"])
         br
         a href="#{link["source"]}" #{link["name"]}
-        form method="get" action="/links/#{link["id"]}/edit"
+        form method="get" action="/links/protected/#{link["id"]}/edit"
             br
             input type="submit" value="Edit"/
-        form method="post" action="links/#{link["id"]}/delete"
+        form method="post" action="links/protected/#{link["id"]}/delete"
             input type="submit" value="Delete"/

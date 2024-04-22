@@ -1,6 +1,6 @@
 h2 Edit: #{@name[0][0]}
 p Created by #{@author[0][0]}
-form action="/processors/#{@id}/update" method="post"
+form action="/processors/protected/#{@id}/update" method="post"
     input# type="text" name="name" value="#{@name[0][0]}"/
     textarea# name="content" cols="30" rows="10" #{@content}
     br

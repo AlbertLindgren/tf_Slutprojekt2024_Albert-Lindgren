@@ -18,25 +18,14 @@ end
 # CRUD
 #---------------------------------------------------
 # Before block
-
 before("/processors/new") do 
     if session[:logged_in] != true
         flash[:not_logged_in] = "You need to be logged in to perform this action"
         redirect("/processors")
     end
 end
-before("/processors/:id/edit") do 
-    id = params[:id]
-    if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
-        redirect("/processors")
-    end
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess("db/lowdoc.db", "Processors", session[:user_id], id))
-        flash[:unauthorized] = "You are not authorized to perform this action"
-        redirect("/processors")
-    end
-end
-before("/processors/:id/delete") do 
+
+before("/processors/protected/:id/*") do
     id = params[:id]
     if session[:logged_in] != true
         flash[:not_logged_in] = "You need to be logged in to perform this action"
@@ -54,18 +43,8 @@ before("/subjects/new") do
         redirect("/subjects")
     end
 end
-before("/subjects/:id/edit") do 
-    id = params[:id]
-    if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
-        redirect("/subjects")
-    end
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess("db/lowdoc.db", "Subjects", session[:user_id], id))
-        flash[:unauthorized] = "You are not authorized to perform this action"
-        redirect("/subjects")
-    end
-end
-before("/subjects/:id/delete") do 
+
+before("/subjects/protected/:id/*") do
     id = params[:id]
     if session[:logged_in] != true
         flash[:not_logged_in] = "You need to be logged in to perform this action"
@@ -83,18 +62,8 @@ before("/links/new") do
         redirect("/links")
     end
 end
-before("/links/:id/edit") do 
-    id = params[:id]
-    if session[:logged_in] != true
-        flash[:not_logged_in] = "You need to be logged in to perform this action"
-        redirect("/links")
-    end
-    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" && !(checkUserAccess("db/lowdoc.db", "Links", session[:user_id], id))
-        flash[:unauthorized] = "You are not authorized to perform this action"
-        redirect("/links")
-    end
-end
-before("/links/:id/delete") do 
+
+before("/links/protected/:id/*") do
     id = params[:id]
     if session[:logged_in] != true
         flash[:not_logged_in] = "You need to be logged in to perform this action"
@@ -106,8 +75,8 @@ before("/links/:id/delete") do
     end
 end
 
-before("/protected/*") do
-    if session[:logged_in] == false
+before("/protected/users/:id/*") do
+    if session[:user_privilege] != "admin" && session[:user_privilege] != "owner" || session[:logged_in] == false
         flash[:unauthorized]
         redirect("/")
     end
@@ -167,7 +136,7 @@ end
 # Displays the edit options for the clicked processor
 #
 # @param [Integer] @id, ID of the clicked processor
-get("/processors/:id/edit") do
+get("/processors/protected/:id/edit") do
     @id = params[:id]
     @name = fetchInfo("db/lowdoc.db", "Processors", @id, "name")
 
@@ -203,7 +172,7 @@ end
 # @param [String] name, Updated name of the processor
 # @param [String] content, Updated description of the processor
 # @param [Hash] params, Hash with names and values from the checkboxes
-post("/processors/:id/update") do
+post("/processors/protected/:id/update") do
     id = params[:id]
     name = params[:name]
     content = params[:content]
@@ -249,7 +218,7 @@ end
 # Deletes a processor
 #
 # @param [Integer] id, ID of the clicked processor
-post("/processors/:id/delete") do
+post("/processors/protected/:id/delete") do
     id = params[:id]
     deleteRecord("db/lowdoc.db", "Processors", id)
     redirect("/processors")
@@ -338,7 +307,7 @@ end
 # Displays the edit options for the clicked subject
 #
 # @param [Integer] id, ID of the clicked subject
-get("/subjects/:id/edit") do
+get("/subjects/protected/:id/edit") do
     @id = params[:id]
     @name = fetchInfo("db/lowdoc.db", "Subjects", @id, "name")
 
@@ -374,7 +343,7 @@ end
 # @param [String] name, New name of the clicked subject
 # @param [String] content, New description of the clicked subject
 # @param [Hash] params, Hash with names and values from the checkboxes
-post("/subjects/:id/update") do
+post("/subjects/protected/:id/update") do
     id = params[:id]
     name = params[:name]
     content = params[:content]
@@ -420,7 +389,7 @@ end
 # Deletes a subject
 #
 # @param [Integer] id, ID of the clicked subject
-post("/subjects/:id/delete") do
+post("/subjects/protected/:id/delete") do
     id = params[:id]
     deleteRecord("db/lowdoc.db", "Subjects", id)
     redirect("/subjects")
@@ -493,7 +462,7 @@ end
 # Displays the edit options for the clicked link
 #
 # @param [Integer] id, ID of the clicked link
-get("/links/:id/edit") do
+get("/links/protected/:id/edit") do
     @id = params[:id]
     @name = fetchInfo("db/lowdoc.db", "Links", @id, "name")
     @source = fetchInfo("db/lowdoc.db", "Links", @id, "source")

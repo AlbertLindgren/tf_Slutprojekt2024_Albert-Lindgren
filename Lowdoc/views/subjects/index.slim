@@ -40,16 +40,16 @@ form method="post" action="subjects/filter"
     - if session[:filteredSubjects] == nil
         br
         a href="/subjects/#{subject["id"]}/show" #{subject["name"]}
-        form method="get" action="/subjects/#{subject["id"]}/edit"
+        form method="get" action="/subjects/protected/#{subject["id"]}/edit"
             br
             input type="submit" value="Edit"/
-        form method="post" action="subjects/#{subject["id"]}/delete"
+        form method="post" action="subjects/protected/#{subject["id"]}/delete"
             input type="submit" value="Delete"/
     - elsif session[:filteredSubjects].include?(subject["id"])
         br
         a href="/subjects/#{subject["id"]}/show" #{subject["name"]}
-        form method="get" action="/subjects/#{subject["id"]}/edit"
+        form method="get" action="/subjects/protected/#{subject["id"]}/edit"
             br
             input type="submit" value="Edit"/
-        form method="post" action="subjects/#{subject["id"]}/delete"
+        form method="post" action="subjects/protected/#{subject["id"]}/delete"
             input type="submit" value="Delete"/
